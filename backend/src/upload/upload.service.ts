@@ -6,21 +6,28 @@ import { Readable } from 'stream';
 
 @Injectable()
 export class UploadService {
-  private supabase: SupabaseClient;
+  private supabase?: SupabaseClient;
 
   constructor(private readonly configService: ConfigService) {
     // ── Cloudinary (images) ───────────────────────────────────────────────
-    cloudinary.config({
-      cloud_name: configService.get<string>('cloudinary.cloudName'),
-      api_key:    configService.get<string>('cloudinary.apiKey'),
-      api_secret: configService.get<string>('cloudinary.apiSecret'),
-    });
+    const cloudName = configService.get<string>('cloudinary.cloudName');
+    const apiKey = configService.get<string>('cloudinary.apiKey');
+    const apiSecret = configService.get<string>('cloudinary.apiSecret');
+    if (cloudName && apiKey && apiSecret) {
+      cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
+      });
+    }
 
     // ── Supabase Storage (3D GLB models, up to 50 MB free) ───────────────
     // Uses service_role key to bypass RLS — safe here since this is server-side only.
-    const supabaseUrl = configService.get<string>('supabase.url') as string;
-    const supabaseServiceKey = configService.get<string>('supabase.serviceKey') as string;
-    this.supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseUrl = configService.get<string>('supabase.url');
+    const supabaseServiceKey = configService.get<string>('supabase.serviceKey');
+    if (supabaseUrl && supabaseServiceKey) {
+      this.supabase = createClient(supabaseUrl, supabaseServiceKey);
+    }
   }
 
   // ── Image upload → Cloudinary ──────────────────────────────────────────
@@ -56,6 +63,9 @@ export class UploadService {
     filename: string,
     _folder = 'tunisia-car-rental/3d-models', // kept for API compatibility
   ): Promise<{ secure_url: string; public_id: string }> {
+    if (!this.supabase) {
+      throw new Error('Supabase Storage is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in .env');
+    }
     const filePath = `${filename}.glb`;
 
     console.log(`[uploadRaw] Uploading ${fileBuffer.length} bytes → Supabase bucket "3d-models/${filePath}"`);
