@@ -67,78 +67,42 @@ export default function Navbar() {
           <CurrencyToggle />
 
           {/* Language Selector Dropdown */}
-          <div className="navbar__lang-wrap" ref={langRef} style={{ position: 'relative' }}>
+          <div className="navbar__lang-wrap" ref={langRef}>
             <button
               type="button"
               className="navbar__lang"
               onClick={() => setLangDropdownOpen(prev => !prev)}
-              style={{ display: 'flex', alignItems: 'center', gap: 7 }}
+              aria-label={lang === 'ar' ? 'العربية' : 'Français'}
+              aria-expanded={langDropdownOpen}
             >
               <img
                 src={lang === 'ar' ? '/Ar.png' : '/Fr.png'}
-                alt={lang}
-                style={{ width: 20, height: 14, objectFit: 'cover', borderRadius: 2 }}
+                alt=""
+                className="navbar__lang-flag"
+                width={16}
+                height={11}
               />
-              <span>{lang === 'ar' ? 'العربية' : 'Français'}</span>
-              <FiChevronDown size={13} style={{ transform: langDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              <span className="navbar__lang-name">{lang === 'ar' ? 'العربية' : 'Français'}</span>
+              <span className="navbar__lang-code">{lang === 'ar' ? 'AR' : 'FR'}</span>
+              <FiChevronDown size={13} className={`navbar__lang-chevron${langDropdownOpen ? ' navbar__lang-chevron--open' : ''}`} />
             </button>
 
             {langDropdownOpen && (
-              <div
-                className="navbar__lang-dropdown"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 6px)',
-                  right: 0,
-                  background: '#18181c',
-                  border: '1px solid rgba(212, 160, 23, 0.3)',
-                  borderRadius: 8,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-                  zIndex: 200,
-                  overflow: 'hidden',
-                  minWidth: 140,
-                }}
-              >
+              <div className="navbar__lang-dropdown">
                 <button
                   type="button"
                   className={`navbar__lang-opt ${lang === 'fr' ? 'active' : ''}`}
                   onClick={() => { setLanguage('fr'); setLangDropdownOpen(false) }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    width: '100%',
-                    padding: '9px 14px',
-                    border: 'none',
-                    background: lang === 'fr' ? 'rgba(212,160,23,0.15)' : 'transparent',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
                 >
-                  <img src="/Fr.png" alt="Français" style={{ width: 20, height: 14, objectFit: 'cover', borderRadius: 2 }} />
+                  <img src="/Fr.png" alt="" className="navbar__lang-flag" width={16} height={11} />
                   <span>Français</span>
                 </button>
                 <button
                   type="button"
                   className={`navbar__lang-opt ${lang === 'ar' ? 'active' : ''}`}
                   onClick={() => { setLanguage('ar'); setLangDropdownOpen(false) }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    width: '100%',
-                    padding: '9px 14px',
-                    border: 'none',
-                    background: lang === 'ar' ? 'rgba(212,160,23,0.15)' : 'transparent',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
                 >
-                  <img src="/Ar.png" alt="العربية" style={{ width: 20, height: 14, objectFit: 'cover', borderRadius: 2 }} />
+                  <img src="/Ar.png" alt="" className="navbar__lang-flag" width={16} height={11} />
                   <span>العربية</span>
                 </button>
               </div>
@@ -194,6 +158,27 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="navbar__mobile">
+          <div className="navbar__mobile-toolbar">
+            <CurrencyToggle />
+            <div className="navbar__mobile-langs">
+              <button
+                type="button"
+                className={`navbar__mobile-lang-btn ${lang === 'fr' ? 'navbar__mobile-lang-btn--active' : ''}`}
+                onClick={() => setLanguage('fr')}
+              >
+                <img src="/Fr.png" alt="" className="navbar__lang-flag" width={16} height={11} />
+                Français
+              </button>
+              <button
+                type="button"
+                className={`navbar__mobile-lang-btn ${lang === 'ar' ? 'navbar__mobile-lang-btn--active' : ''}`}
+                onClick={() => setLanguage('ar')}
+              >
+                <img src="/Ar.png" alt="" className="navbar__lang-flag" width={16} height={11} />
+                العربية
+              </button>
+            </div>
+          </div>
           {(isAdmin
             ? [{ key: 'admin', label: t('nav.tableauDeBord', 'Dashboard'), href: '/admin' }, ...navLinks]
             : [...navLinks, { key: 'historique', label: `🕐 ${t('nav.historique', 'Historique')}`, href: '/historique' }]
@@ -211,7 +196,6 @@ export default function Navbar() {
             <button
               className="navbar__mobile-link"
               onClick={() => { handleLogout(); setMobileOpen(false) }}
-              style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               <FiLogOut size={14} /> {t('nav.logout', 'Déconnexion')}
             </button>
@@ -219,7 +203,6 @@ export default function Navbar() {
             <button
               className="navbar__mobile-link"
               onClick={() => { openAuthModal('login'); setMobileOpen(false) }}
-              style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               <FiUser size={14} /> {t('nav.login', 'Se connecter')}
             </button>

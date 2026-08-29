@@ -20,8 +20,13 @@
 .appdownload__mockup { width: 100%; max-width: 420px; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6)); }
 
 @media (max-width: 768px) {
-  .appdownload__inner { flex-direction: column; gap: 32px; }
+  .appdownload { padding: 36px 0; }
+  .appdownload__inner { flex-direction: column-reverse; gap: 24px; text-align: center; }
   .appdownload__right { width: 100%; }
-  .appdownload__mockup { max-width: 300px; }
-  .appdownload__title { font-size: 22px; }
+  .appdownload__mockup { max-width: 200px; }
+  .appdownload__title { font-size: 20px; }
+  .appdownload__desc { font-size: 13px; margin-bottom: 20px; }
+  .appdownload__buttons { justify-content: center; flex-direction: column; }
+  .appdownload__store-btn { width: 100%; justify-content: center; }
+  .appdownload__qr { display: none; }
 }

@@ -55,7 +55,11 @@
 }
 
 @media (max-width: 768px) {
-  .hist-kpis { grid-template-columns: repeat(2, 1fr); }
+  .hist-hero { padding: 28px 0 20px; }
+  .hist-hero__inner { padding: 0 16px; }
+  .hist-hero__title { font-size: 22px; }
+  .hist-kpis { grid-template-columns: repeat(2, 1fr); padding: 20px 16px 0; gap: 10px; }
+  .hist-kpi { padding: 14px; }
 }
 
 .hist-kpi {

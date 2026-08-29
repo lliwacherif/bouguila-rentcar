@@ -21,7 +21,20 @@
 .hero__subtitle { font-size: 15px; font-weight: 400; color: var(--white-70); line-height: 1.7; }
 
 @media (max-width: 768px) {
-  .hero { height: 340px; }
-  .hero__title { font-size: 30px; }
-  .hero__subtitle { font-size: 13px; }
+  .hero {
+    height: auto;
+    min-height: 260px;
+    align-items: flex-end;
+  }
+  .hero__overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.2) 100%);
+  }
+  .hero__content { padding: 28px 0 32px; }
+  .hero__title { font-size: 26px; letter-spacing: -0.4px; margin-bottom: 10px; }
+  .hero__subtitle { font-size: 13px; line-height: 1.55; }
+}
+
+@media (max-width: 400px) {
+  .hero { min-height: 220px; }
+  .hero__title { font-size: 22px; }
 }

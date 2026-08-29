@@ -7,5 +7,10 @@
 .stats__value { font-size: 24px; font-weight: 800; color: var(--white); line-height: 1.2; }
 .stats__label { font-size: 12.5px; color: var(--white-50); margin-top: 2px; }
 
-@media (max-width: 768px) { .stats__inner { grid-template-columns: repeat(2, 1fr); } .stats__item { border-right: none; border-bottom: 1px solid var(--black-4); } }
-@media (max-width: 400px)  { .stats__inner { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .stats { padding: 20px 0; }
+  .stats__inner { grid-template-columns: repeat(2, 1fr); gap: 0; }
+  .stats__item { border-right: none; border-bottom: 1px solid var(--black-4); padding: 14px 8px; }
+  .stats__value { font-size: 20px; }
+  .stats__label { font-size: 11.5px; }
+}

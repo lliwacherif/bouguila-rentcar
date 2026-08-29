@@ -74,9 +74,22 @@
 .booking__checkbox--checked { background: var(--gold); border-color: var(--gold); }
 
 @media (max-width: 768px) {
-  .booking__fields { flex-direction: column; }
-  .booking__field, .booking__field--wide, .booking__field--narrow { flex: 1; min-width: 100%; }
+  .booking__card { border-radius: 0 0 12px 12px; margin-top: -16px; }
+  .booking__tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .booking__tab { flex: 1; text-align: center; padding: 12px 10px; font-size: 12.5px; white-space: nowrap; }
+  .booking__form { padding: 16px 16px 14px; }
+  .booking__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+  }
+  .booking__field, .booking__field--wide, .booking__field--narrow { flex: 1; min-width: 0; }
+  .booking__field--wide,
+  .booking__field--narrow,
+  .booking__field--btn { grid-column: 1 / -1; }
   .booking__field--btn { width: 100%; }
-  .booking__search-btn { width: 100%; }
+  .booking__search-btn { width: 100%; height: 46px; font-size: 16px; }
+  .booking__input, .booking__select { font-size: 16px; }
   .booking__label--hidden { display: none; }
 }

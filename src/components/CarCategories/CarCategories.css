@@ -41,4 +41,15 @@
 .categories__card--skeleton { width: 185px; height: 188px; flex-shrink: 0; border-radius: 12px; background: linear-gradient(90deg, var(--black-3) 25%, var(--black-4) 50%, var(--black-3) 75%); background-size: 200% 100%; animation: sk-wave 1.5s infinite; }
 @keyframes sk-wave { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
-@media (max-width: 768px) { .categories__arrow { display: none; } }
+@media (max-width: 768px) {
+  .categories { padding: 36px 0 32px; }
+  .categories__header { margin-bottom: 16px; gap: 12px; }
+  .categories__title { font-size: 18px; }
+  .categories__arrow { display: none; }
+  .categories__slider { gap: 10px; scroll-snap-type: x mandatory; padding: 4px 0; }
+  .categories__card {
+    width: min(158px, 68vw);
+    scroll-snap-align: start;
+  }
+  .categories__card-img-wrap { height: 100px; padding: 8px; }
+}

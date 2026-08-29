@@ -137,8 +137,17 @@
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .am-card { grid-template-columns: 1fr; height: auto; max-height: 95vh; overflow-y: auto; }
+  .am-overlay { padding: 0; align-items: flex-end; }
+  .am-card {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: 96vh;
+    overflow-y: auto;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+  }
   .am-slot--b .am-panel--image, .am-slot--a .am-panel--image { display: none; }
-  .am-panel__inner { padding: 28px 24px; }
+  .am-panel__inner { padding: 24px 20px calc(20px + env(safe-area-inset-bottom)); }
   .am-row-two { grid-template-columns: 1fr; }
+  .am-title { font-size: 20px; }
 }

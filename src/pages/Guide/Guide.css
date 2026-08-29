@@ -76,15 +76,18 @@
 }
 
 @media (max-width: 850px) {
+  .guide-container { padding-top: 24px; padding-bottom: 48px; }
+  .guide-hero-banner { margin-bottom: 36px; }
+  .guide-title { font-size: 22px; }
+  .guide-timeline-container { gap: 36px; margin-bottom: 40px; }
   .guide-timeline-row,
   .guide-timeline-row--reverse {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
-}
-
-.guide-timeline-row--reverse {
-  grid-template-columns: 1fr 1fr;
+  .guide-timeline-img-card { height: 200px; }
+  .guide-timeline-text-card { padding: 20px; }
+  .guide-section { padding: 20px; margin-bottom: 24px; }
 }
 
 .guide-timeline-row--reverse .guide-timeline-img-card {

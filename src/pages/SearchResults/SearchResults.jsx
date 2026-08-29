@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { FiMapPin, FiCalendar, FiUser, FiHeart, FiChevronDown, FiCheck, FiInfo, FiShield, FiAlertCircle, FiLogOut } from 'react-icons/fi'
+import { FiMapPin, FiCalendar, FiUser, FiHeart, FiChevronDown, FiCheck, FiInfo, FiShield, FiAlertCircle, FiLogOut, FiSliders, FiX } from 'react-icons/fi'
 import { vehiclesService, parcsService } from '../../services/vehiclesService'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -152,6 +152,7 @@ export default function SearchResults() {
   const [page, setPage]                     = useState(1)
 
   const [parcs, setParcs] = useState([])
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     parcsService.getAll().then(data => setParcs(data || [])).catch(() => {})
@@ -305,9 +306,13 @@ export default function SearchResults() {
         </div>
       </div>
 
+      {filtersOpen && (
+        <div className="sr-filters-backdrop" onClick={() => setFiltersOpen(false)} />
+      )}
+
       <div className="sr-body container">
         {/* Sidebar */}
-        <aside className="sr-sidebar">
+        <aside className={`sr-sidebar ${filtersOpen ? 'sr-sidebar--open' : ''}`}>
           {/* Recap */}
           <div className="sr-recap">
             <h4 className="sr-recap__title">{t('searchResults.recap', 'Récapitulatif')}</h4>
@@ -343,6 +348,9 @@ export default function SearchResults() {
             <div className="sr-filters__header">
               <span className="sr-filters__title">{t('searchResults.filters', 'Filtres')}</span>
               <button className="sr-filters__reset" onClick={resetFilters}>{t('searchResults.reset', 'Réinitialiser')}</button>
+              <button type="button" className="sr-filters__close" onClick={() => setFiltersOpen(false)} aria-label="Close">
+                <FiX size={18} />
+              </button>
             </div>
 
             <div className="sr-filter-group">
@@ -394,13 +402,18 @@ export default function SearchResults() {
             <h2 className="sr-main__count">
               {loading ? '...' : `${pagination?.total ?? vehicles.length} ${t('searchResults.carsAvailable', 'voitures disponibles')}`}
             </h2>
-            <div className="sr-main__sort">
-              <span>{t('searchResults.sortBy', 'Trier par :')}</span>
-              <select className="sr-main__sort-select" value={sortOrder} onChange={e => { setSortOrder(e.target.value); setPage(1) }}>
-                <option value="asc">{t('searchResults.priceAsc', 'Prix (croissant)')}</option>
-                <option value="desc">{t('searchResults.priceDesc', 'Prix (décroissant)')}</option>
-              </select>
-              <FiChevronDown size={14} />
+            <div className="sr-main__header-actions">
+              <button type="button" className="sr-filters-toggle" onClick={() => setFiltersOpen(true)}>
+                <FiSliders size={14} /> {t('searchResults.filters', 'Filtres')}
+              </button>
+              <div className="sr-main__sort">
+                <span>{t('searchResults.sortBy', 'Trier par :')}</span>
+                <select className="sr-main__sort-select" value={sortOrder} onChange={e => { setSortOrder(e.target.value); setPage(1) }}>
+                  <option value="asc">{t('searchResults.priceAsc', 'Prix (croissant)')}</option>
+                  <option value="desc">{t('searchResults.priceDesc', 'Prix (décroissant)')}</option>
+                </select>
+                <FiChevronDown size={14} />
+              </div>
             </div>
           </div>
 

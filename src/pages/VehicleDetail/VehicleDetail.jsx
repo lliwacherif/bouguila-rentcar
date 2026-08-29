@@ -373,7 +373,7 @@ export default function VehicleDetail() {
         </div>
 
         {/* RIGHT sticky panel */}
-        <div className="vd-right">
+        <div className="vd-right" id="vd-booking">
           {bookingSuccess ? (
             <div className="vd-panel" style={{ textAlign: 'center', padding: 32 }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
@@ -538,6 +538,18 @@ export default function VehicleDetail() {
           </div>
         </div>
       </div>
+
+      {!bookingSuccess && (
+        <div className="vd-mobile-cta">
+          <div className="vd-mobile-cta__price">
+            <span className="vd-mobile-cta__label">Total TTC</span>
+            <span className="vd-mobile-cta__value">{formatPrice(totalTTC)}</span>
+          </div>
+          <button type="button" className="vd-mobile-cta__btn" onClick={handleReserve} disabled={submitting}>
+            {submitting ? '...' : 'Réserver'}
+          </button>
+        </div>
+      )}
 
       <Footer />
     </div>

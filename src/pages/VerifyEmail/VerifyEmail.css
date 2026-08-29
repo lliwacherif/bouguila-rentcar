@@ -129,3 +129,9 @@
   background: var(--black-4, #27272a);
   color: var(--white, #ffffff);
 }
+
+@media (max-width: 640px) {
+  .ve-container { padding: 32px 16px; }
+  .ve-card { padding: 28px 20px; }
+  .ve-title { font-size: 20px; }
+}
