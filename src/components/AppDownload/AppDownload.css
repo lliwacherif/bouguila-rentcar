@@ -10,7 +10,7 @@
   padding: 10px 18px; border-radius: var(--radius); text-decoration: none;
   border: 1.5px solid var(--black-5); transition: all .2s; min-width: 145px;
 }
-.appdownload__store-btn:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.15); }
+.appdownload__store-btn:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,111,181,0.15); }
 .appdownload__store-text { display: flex; flex-direction: column; }
 .appdownload__store-sub { font-size: 10px; color: var(--white-50); line-height: 1.2; }
 .appdownload__store-name { font-size: 14px; font-weight: 700; line-height: 1.3; }

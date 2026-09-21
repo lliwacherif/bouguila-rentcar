@@ -6,6 +6,7 @@
   color: var(--white);
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }
 
 .guide-container {
@@ -26,8 +27,8 @@
   font-size: 11px;
   font-weight: 800;
   color: var(--gold);
-  background: rgba(212, 160, 23, 0.12);
-  border: 1px solid rgba(212, 160, 23, 0.35);
+  background: rgba(59, 111, 181, 0.12);
+  border: 1px solid rgba(59, 111, 181, 0.35);
   padding: 4px 14px;
   border-radius: 20px;
   margin-bottom: 12px;
@@ -46,7 +47,7 @@
 
 .guide-title--gold {
   color: var(--gold);
-  background: linear-gradient(135deg, #f59e0b 0%, #d4a017 50%, #fbbf24 100%);
+  background: linear-gradient(135deg, #5b8fd4 0%, #3b6fb5 50%, #7ba8e0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -149,8 +150,8 @@
 }
 
 .guide-timeline-img-card:hover {
-  border-color: rgba(212, 160, 23, 0.45);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 160, 23, 0.15);
+  border-color: rgba(59, 111, 181, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(59, 111, 181, 0.15);
 }
 
 .guide-timeline-img-card img {
@@ -174,7 +175,7 @@
   background: rgba(13, 13, 15, 0.85);
   backdrop-filter: blur(8px);
   color: var(--gold);
-  border: 1px solid rgba(212, 160, 23, 0.4);
+  border: 1px solid rgba(59, 111, 181, 0.4);
   font-size: 16px;
   font-weight: 900;
   padding: 4px 12px;
@@ -304,7 +305,7 @@
 
 .guide-faq-item:hover,
 .guide-faq-item--open {
-  border-color: rgba(212, 160, 23, 0.4);
+  border-color: rgba(59, 111, 181, 0.4);
   background: rgba(22, 22, 26, 0.95);
 }
 
@@ -329,8 +330,8 @@
 
 /* CTA Card */
 .guide-cta-card {
-  background: linear-gradient(135deg, rgba(212, 160, 23, 0.15) 0%, var(--black-2) 100%);
-  border: 1.5px solid rgba(212, 160, 23, 0.45);
+  background: linear-gradient(135deg, rgba(59, 111, 181, 0.15) 0%, var(--black-2) 100%);
+  border: 1.5px solid rgba(59, 111, 181, 0.45);
   border-radius: 16px;
   padding: 32px 36px;
   display: flex;
@@ -360,8 +361,8 @@
 }
 
 .guide-cta-btn {
-  background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
-  color: #0d0d0f;
+  background: linear-gradient(135deg, #3b6fb5 0%, #1a3d6e 100%);
+  color: var(--gold-ink);
   font-weight: 800;
   font-size: 14.5px;
   padding: 14px 28px;
@@ -376,7 +377,7 @@
 
 .guide-cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(212, 160, 23, 0.4);
+  box-shadow: 0 8px 24px rgba(59, 111, 181, 0.4);
 }
 
 @keyframes guideFadeUp {

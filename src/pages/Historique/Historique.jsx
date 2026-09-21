@@ -66,9 +66,9 @@ function ReservationCard({ r }) {
             <span style={{
               fontSize: 13,
               fontWeight: 800,
-              color: '#d4a017',
-              background: 'rgba(212, 160, 23, 0.2)',
-              border: '1px solid rgba(212, 160, 23, 0.5)',
+              color: 'var(--gold)',
+              background: 'var(--gold-pale)',
+              border: '1px solid var(--gold-pale2)',
               borderRadius: 6,
               padding: '2px 8px',
               letterSpacing: '0.8px',

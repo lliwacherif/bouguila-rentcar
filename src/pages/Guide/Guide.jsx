@@ -19,23 +19,23 @@ export default function Guide() {
       badgeColor: '#3b82f6',
       title: t('guide.step1Title', '1. Choisissez votre voiture & Réservez'),
       desc: t('guide.step1Desc', 'Parcourez notre flotte de véhicules disponibles, choisissez vos dates et sélectionnez vos agences de départ et d\'arrivée. Aucun centime n\'est prélevé à cette étape.'),
-      img: '/guide_car_selection.png',
+      img: '/images/sahel-coast.webp',
     },
     {
       step: '02',
       badge: t('guide.step2Badge', 'Vérification rapide'),
-      badgeColor: '#d4a017',
+      badgeColor: '#3b6fb5',
       title: t('guide.step2Title', '2. Validation par notre équipe & Notification'),
       desc: t('guide.step2Desc', 'Notre équipe vérifie la disponibilité exacte et valide votre profil client. Dès approbation, la réservation passe en statut En attente ⏳. Vous recevez un e-mail avec votre code unique #TCR-XXXXXX.'),
-      img: '/guide_approval_notification.png',
+      img: '/images/sahel-planning.webp',
     },
     {
       step: '03',
       badge: t('guide.step3Badge', 'Paiement en Agence'),
-      badgeColor: '#fbbf24',
+      badgeColor: '#5b8fd4',
       title: t('guide.step3Title', '3. Rendez-vous en agence avec votre code'),
       desc: t('guide.step3Desc', 'Présentez-vous dans l\'une de nos agences muni(e) de votre code de réservation #TCR-XXXXXX. Réglez l\'acompte requis (ou la totalité) en espèces ou par carte bancaire.'),
-      img: '/guide_agency_payment.png',
+      img: '/images/sahel-keys.webp',
     },
     {
       step: '04',
@@ -43,7 +43,7 @@ export default function Guide() {
       badgeColor: '#4ade80',
       title: t('guide.step4Title', '4. Validation & Prise des clés'),
       desc: t('guide.step4Desc', 'Dès le règlement de l\'acompte en agence, l\'agent valide votre réservation en statut Confirmée ✅. Votre véhicule est officiellement bloqué pour vos dates et les clés vous sont remises !'),
-      img: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=800&q=80',
+      img: '/images/sahel-hero.webp',
     },
   ]
 
@@ -160,7 +160,7 @@ export default function Guide() {
             >
               {/* Visual Card Image */}
               <div className="guide-timeline-img-card">
-                <img src={s.img} alt={s.title} />
+                <img src={s.img} alt={s.title} loading="lazy" decoding="async" width="1200" height="800" />
                 <div className="guide-img-overlay">
                   <span className="guide-step-tag">{s.step}</span>
                 </div>
@@ -222,18 +222,17 @@ export default function Guide() {
               <div
                 key={i}
                 className={`guide-faq-item ${activeFaq === i ? 'guide-faq-item--open' : ''}`}
-                onClick={() => setActiveFaq(activeFaq === i ? -1 : i)}
               >
-                <div className="guide-faq-question">
+                <button type="button" className="guide-faq-question" aria-expanded={activeFaq === i} aria-controls={`faq-answer-${i}`} onClick={() => setActiveFaq(activeFaq === i ? -1 : i)}>
                   <span>{f.q}</span>
                   <FiChevronDown
                     size={18}
                     className="guide-faq-chevron"
                     style={{ transform: activeFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
                   />
-                </div>
+                </button>
                 {activeFaq === i && (
-                  <div className="guide-faq-answer">
+                  <div className="guide-faq-answer" id={`faq-answer-${i}`}>
                     <p>{f.a}</p>
                   </div>
                 )}

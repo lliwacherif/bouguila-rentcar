@@ -88,7 +88,7 @@
   background: var(--black-2); border: 1.5px solid var(--black-4); border-radius: 14px;
   padding: 18px; display: flex; align-items: center; gap: 14px; position: relative;
 }
-.dash-performer--best  { border-color: rgba(201,168,76,0.3); }
+.dash-performer--best  { border-color: rgba(59, 111, 181,0.3); }
 .dash-performer--worst { border-color: rgba(239,68,68,0.2); }
 .dash-performer__badge {
   position: absolute; top: 12px; right: 12px;
@@ -133,7 +133,7 @@
 .admin-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; border: none; white-space: nowrap; }
 .admin-btn--outline { background: var(--black-3); border: 1.5px solid var(--black-5); color: var(--white-70); }
 .admin-btn--outline:hover { border-color: var(--gold); color: var(--gold); }
-.admin-btn--primary { background: var(--gold); color: var(--black); font-weight: 700; }
+.admin-btn--primary { background: var(--gold); color: var(--gold-ink); font-weight: 700; }
 .admin-btn--primary:hover { background: var(--gold-light); }
 
 /* ── Table ── */
@@ -376,7 +376,7 @@
 .vm-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; border-top: 1px solid var(--black-4); margin-top: 4px; }
 
 /* Spinner */
-.admin-spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--black); border-radius: 50%; animation: spin .65s linear infinite; display: inline-block; }
+.admin-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.25); border-top-color: var(--gold-ink); border-radius: 50%; animation: spin .65s linear infinite; display: inline-block; }
 @keyframes spin { to{transform:rotate(360deg)} }
 
 /* ── Responsive ── */
@@ -587,7 +587,7 @@
 }
 .parc-col--drag-over {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212,160,23,.18);
+  box-shadow: 0 0 0 3px rgba(59, 111, 181,.18);
 }
 .parc-col--unassign-drop {
   position: fixed;
@@ -644,9 +644,9 @@
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 20px;
-  background: rgba(212,160,23,.15);
+  background: rgba(59, 111, 181,.15);
   color: var(--gold);
-  border: 1px solid rgba(212,160,23,.3);
+  border: 1px solid rgba(59, 111, 181,.3);
 }
 
 /* ── Column body (unassigned) ── */
@@ -690,7 +690,7 @@
 }
 .parc-vehicle-card:hover {
   background: rgba(255,255,255,.06);
-  border-color: var(--gold-30, rgba(212,160,23,.35));
+  border-color: var(--gold-30, rgba(59, 111, 181,.35));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,.3);
 }

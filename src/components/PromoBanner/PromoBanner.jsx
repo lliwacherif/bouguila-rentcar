@@ -23,9 +23,9 @@ export default function PromoBanner() {
           </div>
           <div className="promo__right">
             <img
-              src="/promo_car.png"
-              alt="Automedon Car Rental SaaS Promo"
-              className="promo__img"
+              src="/images/sahel-coast.webp"
+              alt="Bouguila Car Promo"
+              className="promo__img" loading="lazy" decoding="async" width="1200" height="800"
             />
           </div>
         </div>

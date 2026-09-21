@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiPhone, FiMail, FiMapPin, FiSend, FiFacebook, FiInstagram, FiLinkedin, FiTwitter } from 'react-icons/fi'
+import { FiPhone, FiMail, FiMapPin, FiSend, FiInstagram } from 'react-icons/fi'
 import { useLanguage } from '../../context/LanguageContext'
-import automedonLogo from '../../assets/Automedon logo.jpg'
+import { AGENCY } from '../../constants/agency'
 import './Footer.css'
 
 const YEAR = new Date().getFullYear()
@@ -33,16 +33,13 @@ export default function Footer() {
         {/* Brand column */}
         <div className="footer__col footer__col--brand">
           <Link to="/" className="footer__logo">
-            <img src={automedonLogo} alt="Automedon Car Rental SaaS" style={{ height: 48, borderRadius: 6, objectFit: 'contain' }} />
+            <img src={AGENCY.logo} alt={AGENCY.name} className="footer__logo-img" />
           </Link>
           <p className="footer__brand-desc">
-            {t('footer.brandDesc', 'Votre plateforme de confiance pour la location de voitures et gestion de flotte en Tunisie.')}
+            {t('footer.brandDesc', 'Location de voitures à Sayada, Monastir — votre partenaire de confiance en Tunisie.')}
           </p>
           <div className="footer__socials">
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="footer__social" aria-label="Facebook"><FiFacebook size={16} /></a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="footer__social" aria-label="Instagram"><FiInstagram size={16} /></a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="footer__social" aria-label="Twitter"><FiTwitter size={16} /></a>
-            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="footer__social" aria-label="LinkedIn"><FiLinkedin size={16} /></a>
+            <a href={AGENCY.instagram} target="_blank" rel="noreferrer" className="footer__social" aria-label="Instagram"><FiInstagram size={16} /></a>
           </div>
         </div>
 
@@ -74,16 +71,16 @@ export default function Footer() {
             <li className="footer__contact-item" style={{ alignItems: 'flex-start' }}>
               <FiPhone size={13} style={{ marginTop: 3 }} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <a href="tel:+21629662305" className="footer__link">+216 29 662 305</a>
+                <a href={`tel:${AGENCY.phoneTel}`} className="footer__link">{AGENCY.phoneDisplay}</a>
               </div>
             </li>
             <li className="footer__contact-item">
               <FiMail size={13} />
-              <a href="mailto:contact@automedon.tn" className="footer__link">contact@automedon.tn</a>
+              <a href={`mailto:${AGENCY.email}`} className="footer__link">{AGENCY.email}</a>
             </li>
             <li className="footer__contact-item">
               <FiMapPin size={13} style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span className="footer__address">Monastir, Tunisie</span>
+              <span className="footer__address">{AGENCY.address}</span>
             </li>
           </ul>
         </div>
@@ -114,7 +111,10 @@ export default function Footer() {
 
       <div className="footer__bottom">
         <div className="container">
-          <p className="footer__copyright">© {YEAR} Automedon Car Rental SaaS. {t('footer.copyright', 'Tous droits réservés.')}</p>
+          <p className="footer__copyright">
+            © {YEAR} {AGENCY.name}. {t('footer.copyright', 'Tous droits réservés.')} ·{' '}
+            <a href="https://automedon.tn" target="_blank" rel="noreferrer">Automedon Platforms Technologies</a>
+          </p>
         </div>
       </div>
     </footer>

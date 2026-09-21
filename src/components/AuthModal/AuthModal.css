@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   AUTH MODAL — Black & Gold theme
+   AUTH MODAL — Black & Navy theme
 ═══════════════════════════════════════════════════════ */
 .am-overlay {
   position: fixed; inset: 0;
@@ -40,6 +40,7 @@
 .am-panel__inner { padding: 24px 32px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; justify-content: space-between; }
 
 .am-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 700; color: var(--gold); }
+.am-logo-img { height: 52px; width: auto; object-fit: contain; }
 
 .am-title { font-size: 24px; font-weight: 800; color: var(--white); margin: 0 0 10px; letter-spacing: -0.5px; }
 .am-sub   { font-size: 13px; color: var(--white-50); margin: 0 0 14px; }
@@ -75,7 +76,7 @@
 .am-link { color: var(--gold); font-weight: 600; text-decoration: underline; }
 
 .am-submit {
-  width: 100%; padding: 10px; background: var(--gold); color: var(--black);
+  width: 100%; padding: 10px; background: var(--gold); color: var(--gold-ink);
   border: none; border-radius: 8px; font-size: 13.5px; font-weight: 800;
   cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;
   min-height: 40px; margin-top: 4px; letter-spacing: 0.3px; transition: background .15s, transform .1s;
@@ -84,7 +85,7 @@
 .am-submit:active:not(:disabled) { transform: scale(0.98); }
 .am-submit:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.am-spinner { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--black); border-radius: 50%; animation: am-spin .65s linear infinite; display: inline-block; }
+.am-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.25); border-top-color: var(--gold-ink); border-radius: 50%; animation: am-spin .65s linear infinite; display: inline-block; }
 @keyframes am-spin { to { transform: rotate(360deg) } }
 
 .am-divider { display: flex; align-items: center; gap: 10px; margin: 8px 0 6px; font-size: 10.5px; font-weight: 700; color: var(--white-30); letter-spacing: 0.5px; }

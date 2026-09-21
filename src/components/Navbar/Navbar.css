@@ -6,6 +6,20 @@
   border-bottom: 1px solid var(--black-4);
   box-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
+.navbar--home {
+  position: fixed;
+  inset: 0 0 auto;
+  background: linear-gradient(180deg, rgba(5, 20, 31, .72), transparent);
+  border-color: transparent;
+  box-shadow: none;
+  transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+}
+.navbar--home.navbar--scrolled {
+  background: rgba(8, 27, 42, .92);
+  border-color: rgba(255,255,255,.09);
+  box-shadow: 0 12px 35px rgba(4, 14, 23, .22);
+  backdrop-filter: blur(18px);
+}
 .navbar__inner {
   display: flex;
   align-items: center;
@@ -15,7 +29,7 @@
 
 /* Logo */
 .navbar__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
-.navbar__logo-img { height: 50px; width: auto; object-fit: contain; }
+.navbar__logo-img { height: 58px; width: auto; object-fit: contain; }
 /* We override stroke via currentColor in the JSX component. ── */
 
 /* Nav */
@@ -65,7 +79,7 @@ img.navbar__lang-flag,
   top: calc(100% + 6px);
   right: 0;
   background: #18181c;
-  border: 1px solid rgba(212, 160, 23, 0.3);
+  border: 1px solid var(--gold-pale2);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.6);
   z-index: 220;
@@ -86,7 +100,7 @@ img.navbar__lang-flag,
   font-family: inherit;
 }
 .navbar__lang-opt:hover,
-.navbar__lang-opt.active { background: rgba(212,160,23,0.15); }
+.navbar__lang-opt.active { background: var(--gold-pale); }
 
 .navbar__user {
   width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
@@ -97,7 +111,7 @@ img.navbar__lang-flag,
 
 .navbar__phone {
   display: flex; align-items: center; gap: 7px;
-  background: var(--gold); color: var(--black);
+  background: var(--gold); color: var(--gold-ink);
   font-size: 13px; font-weight: 700; padding: 8px 14px;
   border-radius: var(--radius); text-decoration: none; transition: background .2s; white-space: nowrap;
 }
@@ -166,7 +180,7 @@ img.navbar__lang-flag,
     direction: ltr;
   }
   .navbar__logo { min-width: 0; max-width: 38%; }
-  .navbar__logo-img { height: 36px; max-width: 100%; width: auto; }
+  .navbar__logo-img { height: 42px; max-width: 100%; width: auto; }
   .navbar__nav { display: none; }
   .navbar__phone,
   .navbar__user-menu,
@@ -192,7 +206,7 @@ img.navbar__lang-flag,
     padding: 5px 8px;
     min-height: 32px;
     max-height: 32px;
-    border-color: rgba(201, 168, 76, 0.45);
+    border-color: var(--gold-pale2);
     background: var(--gold-pale);
     color: var(--gold);
     gap: 5px;
@@ -218,12 +232,12 @@ img.navbar__lang-flag,
 
 /* Admin strip */
 .navbar__admin-strip {
-  background: var(--gold); color: var(--black);
+  background: var(--gold); color: var(--gold-ink);
   font-size: 12px; font-weight: 600; padding: 6px 24px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
 }
 .navbar__admin-strip-link {
-  display: flex; align-items: center; gap: 5px; color: var(--black);
+  display: flex; align-items: center; gap: 5px; color: var(--gold-ink);
   text-decoration: none; font-weight: 700; font-size: 12px; transition: opacity .15s;
 }
 .navbar__admin-strip-link:hover { opacity: 0.75; }
@@ -231,7 +245,7 @@ img.navbar__lang-flag,
 /* Admin badge */
 .navbar__admin-badge {
   display: flex; align-items: center; gap: 5px;
-  background: var(--gold); color: var(--black);
+  background: var(--gold); color: var(--gold-ink);
   font-size: 11.5px; font-weight: 800; padding: 4px 10px; border-radius: 20px;
   text-decoration: none; transition: background .15s; letter-spacing: 0.2px;
 }

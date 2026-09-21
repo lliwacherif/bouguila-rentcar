@@ -1,6 +1,6 @@
 .admin-strip {
   background: var(--gold);
-  color: var(--black);
+  color: var(--gold-ink);
   font-size: 12px;
   font-weight: 600;
   padding: 6px 24px;
@@ -30,7 +30,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--black);
+  color: var(--gold-ink);
   text-decoration: none;
   font-weight: 700;
   font-size: 12px;
@@ -39,7 +39,7 @@
 .admin-strip__link:hover { opacity: 0.65; }
 
 .admin-strip__sep {
-  color: rgba(0,0,0,0.3);
+  color: rgba(255,255,255,0.55);
   font-size: 12px;
 }
 

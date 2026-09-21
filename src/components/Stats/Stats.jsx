@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { vehiclesService } from '../../services/vehiclesService'
 import { useLanguage } from '../../context/LanguageContext'
 import './Stats.css'
+import AnimatedNumber from './AnimatedNumber'
 
 const ICONS = {
   clients: (
@@ -81,7 +82,7 @@ export default function Stats() {
           <div key={s.id} className="stats__item">
             <div className="stats__icon">{s.icon}</div>
             <div className="stats__text">
-              <span className="stats__value">{s.value}</span>
+              <AnimatedNumber value={s.value} />
               <span className="stats__label">{s.label}</span>
             </div>
           </div>

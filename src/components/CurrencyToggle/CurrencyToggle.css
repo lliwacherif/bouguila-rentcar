@@ -35,7 +35,7 @@
 }
 
 .currency-toggle__option--active {
-  color: #0a0a0a !important;
+  color: #ffffff !important;
   font-weight: 800;
 }
 
@@ -44,10 +44,10 @@
   top: 2px;
   bottom: 2px;
   width: calc((100% - 4px) / 3);
-  background: linear-gradient(135deg, #e8c96a 0%, #c9a84c 100%);
+  background: linear-gradient(135deg, #5b8fd4 0%, #3b6fb5 100%);
   border-radius: 16px;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(201, 168, 76, 0.4);
+  box-shadow: 0 2px 8px rgba(59, 111, 181, 0.4);
   z-index: 1;
 }
 

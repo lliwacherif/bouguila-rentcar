@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { FiX, FiEye, FiEyeOff, FiAlertCircle, FiMail } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
-import automedonLogo from '../../assets/Automedon logo.jpg'
+import { AGENCY } from '../../constants/agency'
 import './AuthModal.css'
+import useModalFocus from '../../hooks/useModalFocus'
 
 // ─── Social OAuth Buttons ─────────────────────────────────────────────────────
 function SocialOAuthButtons({ loading }) {
@@ -57,7 +58,7 @@ function SocialOAuthButtons({ loading }) {
 }
 
 // ─── Register Panel ───────────────────────────────────────────────────────────
-function RegisterPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
+function RegisterPanel({ onSwitch, onSubmit, loading, error }) {
   const { t } = useLanguage()
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', age: '', agree: false })
   const [showPw, setShowPw] = useState(false)
@@ -76,7 +77,7 @@ function RegisterPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
     <div className="am-panel am-panel--form">
       <div className="am-panel__inner">
         <div className="am-logo">
-          <img src={automedonLogo} alt="Automedon Car Rental SaaS" style={{ height: 42, borderRadius: 6, objectFit: 'contain' }} />
+          <img src="/images/bouguila-logo.webp" alt={AGENCY.name} className="am-logo-img" />
         </div>
 
         <h2 className="am-title">{t('auth.registerTitle', 'Créer un compte')}</h2>
@@ -103,7 +104,7 @@ function RegisterPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
           <div className="am-row-two">
             <div className="am-field">
               <label className="am-label">{t('auth.phone', 'Téléphone')}</label>
-              <input className="am-input" type="tel" placeholder="+216 29 662 305" value={form.phone} onChange={set('phone')} required autoComplete="tel" />
+              <input className="am-input" type="tel" placeholder={AGENCY.phoneDisplay} value={form.phone} onChange={set('phone')} required autoComplete="tel" />
             </div>
             <div className="am-field">
               <label className="am-label">{t('auth.age', 'Âge')} (18+)</label>
@@ -133,7 +134,7 @@ function RegisterPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
             </label>
           </div>
 
-          <button type="submit" className="am-btn-primary" disabled={loading}>
+          <button type="submit" className="am-submit" disabled={loading}>
             {loading ? <span className="am-spinner" /> : t('auth.registerBtn', 'Créer mon compte')}
           </button>
         </form>
@@ -167,7 +168,7 @@ function LoginPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
     <div className="am-panel am-panel--form">
       <div className="am-panel__inner">
         <div className="am-logo">
-          <img src={automedonLogo} alt="Automedon Car Rental SaaS" style={{ height: 42, borderRadius: 6, objectFit: 'contain' }} />
+          <img src="/images/bouguila-logo.webp" alt={AGENCY.name} className="am-logo-img" />
         </div>
 
         <h2 className="am-title">{t('auth.loginTitle', 'Connexion')}</h2>
@@ -216,13 +217,13 @@ function LoginPanel({ onSwitch, onSubmit, onOAuth, loading, error }) {
 // ─── Image Panel ──────────────────────────────────────────────────────────────
 function ImagePanel({ mode }) {
   const isLogin = mode === 'login'
-  const bgImg = isLogin ? '/auth_login.png' : '/auth_register.png'
+  const bgImg = isLogin ? '/images/sahel-hero-mobile.webp' : '/images/sahel-coast.webp'
 
   return (
     <div className="am-panel am-panel--image">
       <img
         src={bgImg}
-        alt="Tunisia Car Rental"
+        alt={AGENCY.name}
         className="am-bg-img"
       />
       <div className="am-image-overlay" />
@@ -289,8 +290,8 @@ function VerificationSentPanel({ data, onClose }) {
   return (
     <div className="am-panel am-panel--form">
       <div className="am-panel__inner" style={{ textAlign: 'center', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(212,160,23,0.15)', border: '1.5px solid rgba(212,160,23,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-          <FiMail size={24} color="#d4a017" />
+        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--gold-pale)', border: '1.5px solid var(--gold-pale2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+          <FiMail size={24} color="var(--gold)" />
         </div>
         <h2 className="am-title" style={{ fontSize: 20, marginBottom: 6 }}>Vérifiez vos e-mails 📩</h2>
         <p style={{ fontSize: 12.5, color: '#a1a1aa', lineHeight: 1.5, marginBottom: 14 }}>
@@ -346,6 +347,7 @@ export default function AuthModal() {
   const [verificationEmail, setVerificationEmail] = useState(null)
   const [animating, setAnimating] = useState(false)
   const overlayRef = useRef(null)
+  useModalFocus(open, overlayRef, closeAuthModal)
 
   useEffect(() => {
     if (open) {
@@ -455,7 +457,7 @@ export default function AuthModal() {
           ) : isLogin ? (
             <ImagePanel mode={mode} />
           ) : (
-            <RegisterPanel onSwitch={switchMode} onSubmit={handleRegister} onOAuth={handleOAuth} loading={loading} error={error} />
+            <RegisterPanel onSwitch={switchMode} onSubmit={handleRegister} loading={loading} error={error} />
           )}
         </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiCalendar, FiUser, FiCheck } from 'react-icons/fi'
+import { FiArrowRight, FiCalendar, FiCheck, FiMapPin, FiUser } from 'react-icons/fi'
 import { parcsService } from '../../services/vehiclesService'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -13,7 +13,7 @@ const inSevenDays = new Date(Date.now() + 7 * 86400000).toISOString().split('T')
 export default function BookingForm() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { t, isRtl } = useLanguage()
   const [activeTab, setActiveTab] = useState('location')
   const [sameReturn, setSameReturn] = useState(true)
   const [parcs, setParcs] = useState([])
@@ -54,28 +54,42 @@ export default function BookingForm() {
   }
 
   const minDropoff = form.pickupDate || today
+  const tripDays = Math.max(1, Math.ceil((new Date(form.dropoffDate) - new Date(form.pickupDate)) / 86400000) || 1)
+  const steps = [
+    { number: '01', label: isRtl ? 'المكان' : 'Votre départ', complete: Boolean(form.location) },
+    { number: '02', label: isRtl ? 'التواريخ' : 'Vos dates', complete: Boolean(form.pickupDate && form.dropoffDate) },
+    { number: '03', label: isRtl ? 'السيارة' : 'Votre voiture', complete: false },
+  ]
 
   return (
-    <section className="booking">
+    <section className="booking" id="reservation" aria-label={isRtl ? 'Recherche de voiture' : 'Rechercher une voiture'}>
       <div className="booking__card container">
+        <div className="booking__intro">
+          <div><span className="booking__kicker"><FiMapPin /> {isRtl ? 'خطّط لرحلتك' : 'PLANIFIER VOTRE ROUTE'}</span><h2>{isRtl ? 'إلى أين تأخذك رحلتك؟' : 'Où commence votre voyage ?'}</h2></div>
+          <div className="booking__journey" aria-label={isRtl ? 'مراحل الحجز' : 'Étapes de réservation'}>
+            {steps.map(step => <div key={step.number} className={`booking__journey-step${step.complete ? ' booking__journey-step--complete' : ''}`}><i>{step.complete ? <FiCheck /> : step.number}</i><span>{step.label}</span></div>)}
+          </div>
+        </div>
         {/* Tabs */}
         <div className="booking__tabs">
           <button
             className={`booking__tab ${activeTab === 'location' ? 'booking__tab--active' : ''}`}
             onClick={() => setActiveTab('location')}
+            aria-pressed={activeTab === 'location'}
           >
             {t('booking.carRental', 'Location de voiture')}
           </button>
           <button
             className={`booking__tab ${activeTab === 'utilitaire' ? 'booking__tab--active' : ''}`}
             onClick={() => setActiveTab('utilitaire')}
+            aria-pressed={activeTab === 'utilitaire'}
           >
             {t('booking.vanUtility', 'Camionnette & utilitaire')}
           </button>
         </div>
 
         {/* Form */}
-        <div className="booking__form">
+        <form className="booking__form" onSubmit={e => { e.preventDefault(); handleSearch() }}>
           <div className="booking__fields">
             {/* Lieu de remise — custom dropdown from parcs */}
             <div className="booking__field booking__field--wide">
@@ -101,6 +115,7 @@ export default function BookingForm() {
               <div className="booking__input-wrap">
                 <input
                   type="date"
+                  aria-label={t('booking.pickupDate', 'Date de prise en charge')}
                   className="booking__input booking__input--date"
                   value={form.pickupDate}
                   min={today}
@@ -123,6 +138,7 @@ export default function BookingForm() {
               <div className="booking__input-wrap">
                 <input
                   type="date"
+                  aria-label={t('booking.dropoffDate', 'Date de restitution')}
                   className="booking__input booking__input--date"
                   value={form.dropoffDate}
                   min={minDropoff}
@@ -145,6 +161,7 @@ export default function BookingForm() {
                 ) : (
                   <input
                     type="number"
+                    aria-label={t('booking.driverAge', 'Âge du conducteur')}
                     className="booking__input"
                     value={form.driverAge}
                     min={18}
@@ -159,8 +176,8 @@ export default function BookingForm() {
             {/* Search Button */}
             <div className="booking__field booking__field--btn">
               <label className="booking__label booking__label--hidden">{t('booking.search', 'Rechercher')}</label>
-              <button className="booking__search-btn" onClick={handleSearch}>
-                {t('booking.search', 'Rechercher')}
+              <button className="booking__search-btn" type="submit">
+                <span>{t('booking.search', 'Rechercher')}</span><FiArrowRight />
               </button>
             </div>
           </div>
@@ -168,16 +185,12 @@ export default function BookingForm() {
           {/* Same return checkbox */}
           <div className="booking__footer">
             <label className="booking__checkbox-label">
-              <div
-                className={`booking__checkbox ${sameReturn ? 'booking__checkbox--checked' : ''}`}
-                onClick={() => setSameReturn(!sameReturn)}
-              >
-                {sameReturn && <FiCheck size={11} color="#fff" />}
-              </div>
+<input type="checkbox" className="booking__native-checkbox" checked={sameReturn} onChange={e => setSameReturn(e.target.checked)} />
               <span>{t('booking.sameReturn', 'Même lieu de restitution')}</span>
             </label>
+            <span className="booking__duration">{tripDays} {tripDays > 1 ? t('searchResults.days', 'jours') : t('searchResults.day', 'jour')} · {isRtl ? 'تغيير مجاني' : 'modifiable gratuitement'}</span>
           </div>
-        </div>
+        </form>
       </div>
     </section>
   )

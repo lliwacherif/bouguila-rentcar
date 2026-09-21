@@ -66,7 +66,7 @@ export const translations = {
       clients: 'Clients satisfaits',
       fleet: 'Véhicules dans notre flotte',
       agencies: 'Agences en Tunisie',
-      secured: 'Paiement sécurisé 100%',
+      secured: 'Paiement sécurisé',
     },
 
     // App download
@@ -121,6 +121,7 @@ export const translations = {
       priceAsc: 'Prix (croissant)',
       priceDesc: 'Prix (décroissant)',
       totalPrice: 'Prix total',
+      dailyPrice: 'Prix par jour',
       perDay: 'Soit',
       seeDetails: 'Voir les détails',
       reserve: 'Réserver',
@@ -249,9 +250,9 @@ export const translations = {
 
     // Contact Page
     contact: {
-      titleMain: 'À PROPOS D\'',
-      titleGold: 'AUTOMEDON CAR RENTAL SAAS',
-      subtitle: 'Plateforme moderne et solution intelligente de location de voitures en Tunisie — au service de votre mobilité avec technologies de pointe.',
+      titleMain: 'À PROPOS DE ',
+      titleGold: 'BOUGUILA CAR',
+      subtitle: 'Location de voitures à Sayada, Monastir — un service simple, rapide et transparent pour tous vos déplacements.',
       heroBadge: '📍 Tunisie',
       heroTitle: 'Une équipe passionnée à votre service',
       heroSub: 'Nous mettons tout en œuvre pour rendre votre expérience de location simple, rapide et transparente.',
@@ -259,8 +260,8 @@ export const translations = {
       emailLabel: 'Email',
       addressLabel: 'Adresse',
       hoursLabel: 'Horaires',
-      hoursVal: 'Lun–Sam : 08h–19h (Service 24/7 en ligne)',
-      whyTitle: 'Pourquoi choisir Automedon Car Rental SaaS ?',
+      hoursVal: 'Toujours ouvert',
+      whyTitle: 'Pourquoi choisir Bouguila Car ?',
       whySub: 'Votre partenaire de confiance pour tous vos déplacements en Tunisie',
       mapTitle: 'Notre emplacement',
       formTitle: 'Contactez notre équipe',
@@ -275,7 +276,7 @@ export const translations = {
 
     // Footer
     footer: {
-      brandDesc: 'Votre partenaire de confiance pour la location de voitures en Tunisie.',
+      brandDesc: 'Location de voitures à Sayada, Monastir — votre partenaire de confiance en Tunisie.',
       usefulLinks: 'Liens utiles',
       home: 'Accueil',
       cars: 'Voitures',
@@ -292,7 +293,7 @@ export const translations = {
       emailPlaceholder: 'Votre email',
       subscribeBtn: 'S\'abonner',
       subscribedMsg: '✓ Merci, vous êtes abonné !',
-      copyright: '© Automedon Car Rental SaaS. Tous droits réservés.',
+      copyright: 'Tous droits réservés.',
     },
 
     // Auth Modal
@@ -377,7 +378,7 @@ export const translations = {
       clients: 'عميل راضٍ',
       fleet: 'سيارة في أسطولنا',
       agencies: 'فرع في تونس',
-      secured: 'دفع آمن 100%',
+      secured: 'دفع آمن',
     },
 
     // App download
@@ -432,6 +433,7 @@ export const translations = {
       priceAsc: 'السعر (من الأقل للأعلى)',
       priceDesc: 'السعر (من الأعلى للأقل)',
       totalPrice: 'السعر الإجمالي',
+      dailyPrice: 'السعر لليوم الواحد',
       perDay: 'أي',
       seeDetails: 'عرض التفاصيل',
       reserve: 'احجز الآن',
@@ -561,8 +563,8 @@ export const translations = {
     // Contact Page
     contact: {
       titleMain: 'حول منصة ',
-      titleGold: 'أوتوميدون لتأجير السيارات (Automedon SaaS)',
-      subtitle: 'المنصة الذكية الرائدة لتأجير السيارات وإدارة الأساطيل في تونس — حلول متطورة في خدمتكم.',
+      titleGold: 'بوغيلا كار',
+      subtitle: 'تأجير السيارات في صيادة، المنستير — خدمة بسيطة وسريعة وشفافة لجميع تنقلاتك.',
       heroBadge: '📍 تونس',
       heroTitle: 'فريق شغوف ومتخصص في خدمتكم',
       heroSub: 'نسعى جاهدين لجعل تجربة تأجير سيارتك سهلة، سريعة وشفافة.',
@@ -570,8 +572,8 @@ export const translations = {
       emailLabel: 'البريد الإلكتروني',
       addressLabel: 'العنوان',
       hoursLabel: 'أوقات العمل',
-      hoursVal: 'الإثنين – السبت : 08:00 – 19:00 (خدمة أونلاين 24/7)',
-      whyTitle: 'لماذا تختار منصة أوتوميدون (Automedon SaaS)؟',
+      hoursVal: 'مفتوح دائماً',
+      whyTitle: 'لماذا تختار بوغيلا كار؟',
       whySub: 'شريكك الموثوق لجميع تنقلاتك ورحلاتك في تونس',
       mapTitle: 'موقعنا الجغرافي',
       formTitle: 'تواصل مع فريقنا',
@@ -586,7 +588,7 @@ export const translations = {
 
     // Footer
     footer: {
-      brandDesc: 'شريكك الموثوق لتأجير السيارات في تونس.',
+      brandDesc: 'تأجير السيارات في صيادة، المنستير — شريكك الموثوق في تونس.',
       usefulLinks: 'روابط مفيدة',
       home: 'الرئيسية',
       cars: 'السيارات',
@@ -603,7 +605,7 @@ export const translations = {
       emailPlaceholder: 'بريدك الإلكتروني',
       subscribeBtn: 'اشتراك',
       subscribedMsg: '✓ شكراً، تم الاشتراك بنجاح!',
-      copyright: '© Automedon Car Rental SaaS. جميع الحقوق محفوظة.',
+      copyright: 'جميع الحقوق محفوظة.',
     },
 
     // Auth Modal

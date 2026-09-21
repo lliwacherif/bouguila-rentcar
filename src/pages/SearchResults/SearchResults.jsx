@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { FiMapPin, FiCalendar, FiUser, FiHeart, FiChevronDown, FiCheck, FiInfo, FiShield, FiAlertCircle, FiLogOut, FiSliders, FiX } from 'react-icons/fi'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { FiMapPin, FiCalendar, FiUser, FiHeart, FiChevronDown, FiCheck, FiInfo, FiShield, FiAlertCircle, FiSliders, FiX } from 'react-icons/fi'
 import { vehiclesService, parcsService } from '../../services/vehiclesService'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -31,21 +31,31 @@ function daysBetween(a, b) {
   return d > 0 ? d : 7
 }
 
-function CarCard({ car, searchDays, searchParams }) {
+function CarCard({ car, searchParams }) {
   const [liked, setLiked] = useState(false)
   const navigate = useNavigate()
   const { t, isRtl } = useLanguage()
   const { formatPrice } = useCurrency()
   const color = CATEGORY_COLORS[car.category] || '#1e3a8a'
-  const days = searchDays || 7
-
   const goToDetail = () => navigate(`/voitures/${car._id}?${searchParams}`)
 
   return (
     <div className="sr-card">
       <div className="sr-card__img-wrap">
         {car.images?.[0]
-          ? <img src={car.images[0]} alt={car.name} className="sr-card__img" />
+          ? <img
+              src={car.images[0]}
+              alt={car.name}
+              className="sr-card__img"
+              loading="lazy"
+              decoding="async"
+              width="640"
+              height="400"
+              onError={(event) => {
+                event.currentTarget.onerror = null
+                event.currentTarget.src = '/images/car_citadine.webp'
+              }}
+            />
           : <div className="sr-card__img-placeholder">🚗</div>
         }
       </div>
@@ -90,14 +100,19 @@ function CarCard({ car, searchDays, searchParams }) {
       </div>
 
       <div className="sr-card__right">
-        <button className="sr-card__heart" onClick={() => setLiked(!liked)}>
+        <button
+          type="button"
+          className="sr-card__heart"
+          onClick={() => setLiked(!liked)}
+          aria-label={liked ? t('searchResults.removeFavorite', 'Retirer des favoris') : t('searchResults.addFavorite', 'Ajouter aux favoris')}
+          aria-pressed={liked}
+        >
           <FiHeart size={18} fill={liked ? '#ef4444' : 'none'} color={liked ? '#ef4444' : '#9ca3af'} />
         </button>
 
         <div className="sr-card__pricing">
-          <span className="sr-card__price-label">{t('searchResults.totalPrice', 'Prix total')} ({days} {t('searchResults.days', 'jours')})</span>
-          <span className="sr-card__price">{formatPrice(car.pricePerDay * days, isRtl)}</span>
-          <span className="sr-card__price-day">{t('searchResults.perDay', 'Soit')} {formatPrice(car.pricePerDay, isRtl)} / {t('searchResults.day', 'jour')}</span>
+          <span className="sr-card__price-label">{t('searchResults.dailyPrice', 'Prix par jour')}</span>
+          <span className="sr-card__price">{formatPrice(car.pricePerDay, isRtl)}</span>
         </div>
 
         <div className="sr-card__actions">
@@ -120,8 +135,7 @@ function CarCard({ car, searchDays, searchParams }) {
 
 export default function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const { user, openAuthModal, logout } = useAuth()
+  const { user } = useAuth()
   const { t } = useLanguage()
 
   // Read initial values from URL
@@ -157,6 +171,20 @@ export default function SearchResults() {
   useEffect(() => {
     parcsService.getAll().then(data => setParcs(data || [])).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!filtersOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setFiltersOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [filtersOpen])
 
   const searchDays = daysBetween(searchPickup, searchDropoff)
 
@@ -194,10 +222,15 @@ export default function SearchResults() {
         ...(searchParcId && { parcId: searchParcId }),
       }
       const data = await vehiclesService.getAll(params)
-      setVehicles(data.vehicles)
-      setPagination(data.pagination)
-    } catch {
-      setError('Impossible de charger les véhicules. Vérifiez que le serveur est démarré.')
+      setVehicles(data?.vehicles ?? [])
+      setPagination(data?.pagination ?? null)
+    } catch (err) {
+      const offline = !err?.response
+      setError(
+        offline
+          ? 'Impossible de joindre l\'API. Vérifiez que le backend est démarré.'
+          : (err.response?.data?.message || 'Erreur lors du chargement des véhicules.')
+      )
     } finally {
       setLoading(false)
     }
@@ -237,7 +270,7 @@ export default function SearchResults() {
       <div className="sr-searchbar">
         <div className="sr-searchbar__inner container">
           <div className="sr-searchbar__field">
-            <FiMapPin size={14} color="#d4a017" style={{ flexShrink: 0 }} />
+            <FiMapPin size={14} color="var(--gold)" style={{ flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <div className="sr-searchbar__field-label">{t('booking.pickupLocation', 'Lieu de prise en charge')}</div>
               <ParcSelect
@@ -254,7 +287,7 @@ export default function SearchResults() {
           </div>
           <div className="sr-searchbar__divider"/>
           <div className="sr-searchbar__field">
-            <FiCalendar size={14} color="#d4a017" style={{ flexShrink: 0 }} />
+            <FiCalendar size={14} color="var(--gold)" style={{ flexShrink: 0 }} />
             <div>
               <div className="sr-searchbar__field-label">{t('booking.pickupDate', 'Prise en charge')}</div>
               <input
@@ -267,7 +300,7 @@ export default function SearchResults() {
           </div>
           <div className="sr-searchbar__divider"/>
           <div className="sr-searchbar__field">
-            <FiCalendar size={14} color="#d4a017" style={{ flexShrink: 0 }} />
+            <FiCalendar size={14} color="var(--gold)" style={{ flexShrink: 0 }} />
             <div>
               <div className="sr-searchbar__field-label">{t('booking.dropoffDate', 'Restitution')}</div>
               <input
@@ -281,13 +314,13 @@ export default function SearchResults() {
           </div>
           <div className="sr-searchbar__divider"/>
           <div className="sr-searchbar__field">
-            <FiUser size={14} color="#d4a017" style={{ flexShrink: 0 }} />
+            <FiUser size={14} color="var(--gold)" style={{ flexShrink: 0 }} />
             <div>
               <div className="sr-searchbar__field-label">{t('booking.driverAge', 'Âge conducteur')}</div>
               {user ? (
                 <div style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontWeight: 600, color: '#ffffff' }}>{effectiveAge} {t('booking.years', 'ans')}</span>
-                  <span style={{ fontSize: 10, color: '#d4a017', background: 'rgba(212, 160, 23, 0.15)', borderRadius: 4, padding: '1px 6px', border: '1px solid rgba(212, 160, 23, 0.3)' }}>{t('booking.accountLocked', '🔒 compte')}</span>
+                  <span style={{ fontSize: 10, color: 'var(--gold)', background: 'var(--gold-pale)', borderRadius: 4, padding: '1px 6px', border: '1px solid var(--gold-pale2)' }}>{t('booking.accountLocked', '🔒 compte')}</span>
                 </div>
               ) : (
                 <input
@@ -312,7 +345,7 @@ export default function SearchResults() {
 
       <div className="sr-body container">
         {/* Sidebar */}
-        <aside className={`sr-sidebar ${filtersOpen ? 'sr-sidebar--open' : ''}`}>
+        <aside id="fleet-filters" className={`sr-sidebar ${filtersOpen ? 'sr-sidebar--open' : ''}`}>
           {/* Recap */}
           <div className="sr-recap">
             <h4 className="sr-recap__title">{t('searchResults.recap', 'Récapitulatif')}</h4>
@@ -348,7 +381,7 @@ export default function SearchResults() {
             <div className="sr-filters__header">
               <span className="sr-filters__title">{t('searchResults.filters', 'Filtres')}</span>
               <button className="sr-filters__reset" onClick={resetFilters}>{t('searchResults.reset', 'Réinitialiser')}</button>
-              <button type="button" className="sr-filters__close" onClick={() => setFiltersOpen(false)} aria-label="Close">
+              <button type="button" className="sr-filters__close" onClick={() => setFiltersOpen(false)} aria-label={t('common.close', 'Fermer')}>
                 <FiX size={18} />
               </button>
             </div>
@@ -397,13 +430,19 @@ export default function SearchResults() {
         </aside>
 
         {/* Main results */}
-        <main className="sr-main">
+        <main className="sr-main" aria-busy={loading}>
           <div className="sr-main__header">
             <h2 className="sr-main__count">
               {loading ? '...' : `${pagination?.total ?? vehicles.length} ${t('searchResults.carsAvailable', 'voitures disponibles')}`}
             </h2>
             <div className="sr-main__header-actions">
-              <button type="button" className="sr-filters-toggle" onClick={() => setFiltersOpen(true)}>
+              <button
+                type="button"
+                className="sr-filters-toggle"
+                onClick={() => setFiltersOpen(true)}
+                aria-controls="fleet-filters"
+                aria-expanded={filtersOpen}
+              >
                 <FiSliders size={14} /> {t('searchResults.filters', 'Filtres')}
               </button>
               <div className="sr-main__sort">
@@ -430,10 +469,10 @@ export default function SearchResults() {
               {[1,2,3].map(i => <div key={i} className="sr-skeleton" />)}
             </div>
           ) : (
-            <div className="sr-list">
+            <div className="sr-list" aria-live="polite">
               {vehicles.length === 0
                 ? <div className="sr-empty">{t('searchResults.noCarsFound', 'Aucun véhicule trouvé avec ces critères.')}</div>
-                : vehicles.map(car => <CarCard key={car._id} car={car} searchDays={searchDays} searchParams={carDetailParams} />)
+                : vehicles.map(car => <CarCard key={car._id} car={car} searchParams={carDetailParams} />)
               }
             </div>
           )}

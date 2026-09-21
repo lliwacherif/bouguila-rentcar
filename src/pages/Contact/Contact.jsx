@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar/Navbar'
 import AdminStrip from '../../components/AdminStrip/AdminStrip'
 import Footer from '../../components/Footer/Footer'
 import { useLanguage } from '../../context/LanguageContext'
+import { AGENCY } from '../../constants/agency'
 import './Contact.css'
 
 export default function Contact() {
@@ -38,18 +39,18 @@ export default function Contact() {
         {/* Title Header */}
         <div className="contact-header">
           <h1 className="contact-title">
-            {t('contact.titleMain', 'À PROPOS D\'')}
-            <span className="contact-title--gold">{t('contact.titleGold', 'AUTOMEDON CAR RENTAL SAAS')}</span>
+            {t('contact.titleMain', 'À PROPOS DE ')}
+            <span className="contact-title--gold">{t('contact.titleGold', AGENCY.nameFull.toUpperCase())}</span>
           </h1>
           <p className="contact-subtitle">
-            {t('contact.subtitle', 'Plateforme moderne et solution intelligente de location de voitures en Tunisie — au service de votre mobilité avec technologies de pointe.')}
+            {t('contact.subtitle', 'Location de voitures à Sayada, Monastir — un service simple, rapide et transparent pour tous vos déplacements.')}
           </p>
         </div>
 
         {/* Hero Banner: Showroom Team Image */}
         <section className="contact-hero-panel">
           <div className="contact-hero-img-wrap">
-            <img src="/agency_team_showroom.png" alt="L'équipe Automedon Car Rental SaaS" />
+            <img src="/images/sahel-keys.webp" alt="Remise des clés sur la côte tunisienne" width="1200" height="800" />
             <div className="contact-hero-overlay">
               <div className="contact-hero-badge">{t('contact.heroBadge', '📍 Tunisie')}</div>
               <h2>{t('contact.heroTitle', 'Une équipe passionnée à votre service')}</h2>
@@ -65,7 +66,7 @@ export default function Contact() {
             <div>
               <div className="contact-info-label">{t('contact.phoneLabel', 'Téléphone')}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <a href="tel:+21629662305" className="contact-info-value">+216 29 662 305</a>
+                <a href={`tel:${AGENCY.phoneTel}`} className="contact-info-value">{AGENCY.phoneDisplay}</a>
               </div>
             </div>
           </div>
@@ -73,28 +74,28 @@ export default function Contact() {
             <div className="contact-info-icon">✉️</div>
             <div>
               <div className="contact-info-label">{t('contact.emailLabel', 'Email')}</div>
-              <a href="mailto:contact@automedon.tn" className="contact-info-value">contact@automedon.tn</a>
+              <a href={`mailto:${AGENCY.email}`} className="contact-info-value">{AGENCY.email}</a>
             </div>
           </div>
           <div className="contact-info-card">
             <div className="contact-info-icon">📍</div>
             <div>
               <div className="contact-info-label">{t('contact.addressLabel', 'Adresse')}</div>
-              <span className="contact-info-value">Monastir, Tunisie</span>
+              <span className="contact-info-value">{AGENCY.address}</span>
             </div>
           </div>
           <div className="contact-info-card">
             <div className="contact-info-icon">🕘</div>
             <div>
               <div className="contact-info-label">{t('contact.hoursLabel', 'Horaires')}</div>
-              <span className="contact-info-value">{t('contact.hoursVal', 'Lun–Sam : 08h–19h (Service 24/7 en ligne)')}</span>
+              <span className="contact-info-value">{t('contact.hoursVal', AGENCY.hours)}</span>
             </div>
           </div>
         </div>
 
         {/* What we offer — 6 feature cards */}
         <section className="contact-card-panel">
-          <h2 className="contact-panel-title center">{t('contact.whyTitle', 'Pourquoi choisir Automedon Car Rental SaaS ?')}</h2>
+          <h2 className="contact-panel-title center">{t('contact.whyTitle', `Pourquoi choisir ${AGENCY.name} ?`)}</h2>
           <p className="contact-panel-sub center">{t('contact.whySub', 'Votre partenaire de confiance pour tous vos déplacements en Tunisie')}</p>
 
           <div className="contact-features-grid">
@@ -115,20 +116,21 @@ export default function Contact() {
             <h3 className="contact-panel-title">{t('contact.mapTitle', 'Notre emplacement')}</h3>
             <div className="contact-map-embed">
               <iframe
-                title="Automedon Car Rental SaaS Monastir"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12975.31291244847!2d10.8113!3d35.7643!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1302157777174dbd%3A0x7d87b4bceaa1a4c8!2sMonastir%2C%20Tunisia!5e0!3m2!1sen!2stn!4v1680000000000!5m2!1sen!2stn"
+                title={`${AGENCY.name} ${AGENCY.addressShort}`}
+                src={AGENCY.mapsEmbed}
                 width="100%"
                 height="220"
-                style={{ border: 0, borderRadius: 10, filter: 'invert(90%) hue-rotate(180deg)' }}
+                style={{ border: 0, borderRadius: 10 }}
                 allowFullScreen=""
                 loading="lazy"
               />
             </div>
             <div className="contact-map-info">
-              <p>🏢 <strong>Automedon Car Rental SaaS</strong></p>
-              <p>📍 Monastir, Tunisie</p>
-              <p>📞 <a href="tel:+21629662305">+216 29 662 305</a></p>
-              <p>✉️ <a href="mailto:contact@automedon.tn">contact@automedon.tn</a></p>
+              <p>🏢 <strong>{AGENCY.name}</strong></p>
+              <p>📍 {AGENCY.address}</p>
+              <p>📞 <a href={`tel:${AGENCY.phoneTel}`}>{AGENCY.phoneDisplay}</a></p>
+              <p>✉️ <a href={`mailto:${AGENCY.email}`}>{AGENCY.email}</a></p>
+              <p>📸 <a href={AGENCY.instagram} target="_blank" rel="noreferrer">{AGENCY.instagramHandle}</a></p>
             </div>
           </div>
 
@@ -146,6 +148,8 @@ export default function Contact() {
                 <div className="contact-form-row">
                   <input
                     type="text"
+                    aria-label={t('contact.namePlaceholder', 'Votre nom complet')}
+                    autoComplete="name"
                     required
                     placeholder={t('contact.namePlaceholder', 'Votre nom complet *')}
                     value={formData.name}
@@ -153,6 +157,8 @@ export default function Contact() {
                   />
                   <input
                     type="email"
+                    aria-label={t('contact.emailPlaceholder', 'Votre adresse email')}
+                    autoComplete="email"
                     required
                     placeholder={t('contact.emailPlaceholder', 'Votre adresse email *')}
                     value={formData.email}
@@ -163,16 +169,18 @@ export default function Contact() {
                 <div className="contact-form-row">
                   <input
                     type="tel"
+                    aria-label={t('contact.phonePlaceholder', 'Téléphone')}
+                    autoComplete="tel"
                     placeholder={t('contact.phonePlaceholder', 'Numéro de téléphone')}
                     value={formData.phone}
                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   />
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--white-50)', paddingLeft: 8, flexWrap: 'wrap', gap: 4 }}>
-                    {t('contact.directPhone', '📞 Direct :')} <strong style={{ color: 'var(--gold)' }}>+216 29 662 305</strong>
+                    {t('contact.directPhone', '📞 Direct :')} <strong style={{ color: 'var(--gold)' }}>{AGENCY.phoneDisplay}</strong>
                   </div>
                 </div>
 
-                <textarea
+                <textarea aria-label={t('contact.messagePlaceholder', 'Votre message')}
                   required
                   rows={4}
                   placeholder={t('contact.messagePlaceholder', 'Comment pouvons-nous vous aider ? *')}

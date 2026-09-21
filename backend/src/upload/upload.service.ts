@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Readable } from 'stream';
 
 @Injectable()
 export class UploadService {
-  private supabase?: SupabaseClient;
-
   constructor(private readonly configService: ConfigService) {
-    // ── Cloudinary (images) ───────────────────────────────────────────────
+    // ── Cloudinary (images and raw files) ─────────────────────────────────
     const cloudName = configService.get<string>('cloudinary.cloudName');
     const apiKey = configService.get<string>('cloudinary.apiKey');
     const apiSecret = configService.get<string>('cloudinary.apiSecret');
@@ -19,14 +16,6 @@ export class UploadService {
         api_key: apiKey,
         api_secret: apiSecret,
       });
-    }
-
-    // ── Supabase Storage (3D GLB models, up to 50 MB free) ───────────────
-    // Uses service_role key to bypass RLS — safe here since this is server-side only.
-    const supabaseUrl = configService.get<string>('supabase.url');
-    const supabaseServiceKey = configService.get<string>('supabase.serviceKey');
-    if (supabaseUrl && supabaseServiceKey) {
-      this.supabase = createClient(supabaseUrl, supabaseServiceKey);
     }
   }
 
@@ -57,43 +46,34 @@ export class UploadService {
     });
   }
 
-  // ── 3D GLB upload → Supabase Storage (no 10 MB cap, 50 MB free limit) ─
+  // ── 3D GLB upload → Cloudinary raw upload (Supabase disabled) ───────────
   async uploadRaw(
     fileBuffer: Buffer,
     filename: string,
-    _folder = 'tunisia-car-rental/3d-models', // kept for API compatibility
+    folder = 'tunisia-car-rental/3d-models',
   ): Promise<{ secure_url: string; public_id: string }> {
-    if (!this.supabase) {
-      throw new Error('Supabase Storage is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in .env');
-    }
-    const filePath = `${filename}.glb`;
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: 'raw',
+          folder,
+          public_id: `${filename}.glb`,
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          if (!result) return reject(new Error('Raw upload failed: no result returned'));
+          resolve({
+            secure_url: result.secure_url,
+            public_id: result.public_id,
+          });
+        },
+      );
 
-    console.log(`[uploadRaw] Uploading ${fileBuffer.length} bytes → Supabase bucket "3d-models/${filePath}"`);
-
-    const { error } = await this.supabase.storage
-      .from('3d-models')
-      .upload(filePath, fileBuffer, {
-        contentType: 'model/gltf-binary',
-        upsert: true, // overwrite if same name exists
-      });
-
-    if (error) {
-      console.error('[uploadRaw] Supabase error:', error);
-      throw new Error(`Supabase Storage: ${error.message}`);
-    }
-
-    // Build the public URL
-    const { data } = this.supabase.storage
-      .from('3d-models')
-      .getPublicUrl(filePath);
-
-    const publicUrl = data.publicUrl;
-    console.log(`[uploadRaw] Done — public URL: ${publicUrl}`);
-
-    return {
-      secure_url: publicUrl,
-      public_id: filePath,
-    };
+      const readable = new Readable();
+      readable.push(fileBuffer);
+      readable.push(null);
+      readable.pipe(uploadStream);
+    });
   }
 
   // ── Image delete → Cloudinary ─────────────────────────────────────────

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import '@google/model-viewer'
-import { FiRefreshCw, FiRotateCw, FiMaximize, FiMinimize, FiInfo, FiMove } from 'react-icons/fi'
+import { FiRefreshCw, FiRotateCw, FiMaximize, FiMinimize, FiMove } from 'react-icons/fi'
 import './Car3DViewer.css'
 
 export default function Car3DViewer({ src, carName }) {

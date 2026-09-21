@@ -12,6 +12,7 @@ import Historique from './pages/Historique/Historique'
 import VerifyEmail from './pages/VerifyEmail/VerifyEmail'
 import Guide from './pages/Guide/Guide'
 import Contact from './pages/Contact/Contact'
+import Experience from './components/Experience/Experience'
 
 /** Must be rendered inside AuthProvider */
 function AdminRoute() {
@@ -47,7 +48,7 @@ function AppRoutes() {
       if (userStr) {
         try {
           localStorage.setItem('tcr_user', userStr)
-        } catch (e) {}
+        } catch {}
       }
       // Clean query string from browser URL bar
       window.history.replaceState({}, document.title, window.location.pathname)
@@ -59,7 +60,7 @@ function AppRoutes() {
   }, [])
 
   return (
-    <>
+    <Experience>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/voitures" element={<SearchResults />} />
@@ -71,7 +72,7 @@ function AppRoutes() {
         <Route path="/historique" element={<PrivateRoute><Historique /></PrivateRoute>} />
       </Routes>
       <AuthModal />
-    </>
+    </Experience>
   )
 }
 

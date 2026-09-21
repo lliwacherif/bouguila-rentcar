@@ -92,9 +92,9 @@ export default function AppDownload() {
           {/* Right: Phone mockups */}
           <div className="appdownload__right">
             <img
-              src="/app_mockup.png"
-              alt="Application mobile Automedon Car Rental SaaS"
-              className="appdownload__mockup"
+              src="/images/app_mockup.webp"
+              alt="Application mobile Bouguila Car"
+              className="appdownload__mockup" loading="lazy" decoding="async" width="640" height="640"
             />
           </div>
         </div>

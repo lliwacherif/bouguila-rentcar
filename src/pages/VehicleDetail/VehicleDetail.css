@@ -123,7 +123,7 @@
 .vd-panel__pay-now { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--white-70); margin-bottom: 8px; }
 .vd-panel__pay-now-val { font-size: 20px; font-weight: 800; color: var(--gold); }
 
-.vd-panel__cta { width: 100%; height: 52px; background: var(--gold); color: var(--black); border: none; border-radius: 8px; font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit; transition: background .2s; margin-bottom: 8px; letter-spacing: 0.3px; }
+.vd-panel__cta { width: 100%; height: 52px; background: var(--gold); color: var(--gold-ink); border: none; border-radius: 8px; font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit; transition: background .2s; margin-bottom: 8px; letter-spacing: 0.3px; }
 .vd-panel__cta:hover { background: var(--gold-light); }
 .vd-panel__cta:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -173,7 +173,7 @@
 .vd-mobile-cta__btn {
   flex-shrink: 0;
   background: var(--gold);
-  color: var(--black);
+  color: var(--gold-ink);
   border: none;
   border-radius: 8px;
   padding: 12px 20px;

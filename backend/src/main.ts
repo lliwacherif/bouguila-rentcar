@@ -23,8 +23,22 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // ── CORS ─────────────────────────────────────────────────────────────────
+  const frontendUrl = configService.get<string>('frontendUrl');
   app.enableCors({
-    origin: configService.get<string>('frontendUrl'),
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowedOrigins = [
+        frontendUrl,
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+      ].filter(Boolean);
+      if (allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   });
 

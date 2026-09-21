@@ -54,7 +54,7 @@
   width: 42px;
   height: 42px;
   border: 3px solid rgba(255, 255, 255, 0.15);
-  border-top-color: #fbbf24;
+  border-top-color: var(--gold);
   border-radius: 50%;
   animation: car3dSpin 0.9s linear infinite;
 }
@@ -79,7 +79,7 @@
 
 .car-3d-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
   transition: width 0.25s ease;
 }
 
@@ -106,7 +106,7 @@
 }
 
 .car-3d-hint-icon {
-  color: #fbbf24;
+  color: var(--gold);
   font-size: 15px;
 }
 
@@ -144,14 +144,14 @@
 .car-3d-btn:hover {
   background: rgba(30, 41, 59, 0.9);
   color: #ffffff;
-  border-color: rgba(251, 191, 36, 0.5);
+  border-color: var(--gold-pale2);
   transform: translateY(-1px);
 }
 
 .car-3d-btn--active {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: #f59e0b;
-  color: #fbbf24;
+  background: var(--gold-pale);
+  border-color: var(--gold);
+  color: var(--gold-light);
 }
 
 @media (max-width: 640px) {

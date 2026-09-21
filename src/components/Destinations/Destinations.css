@@ -1,0 +1,28 @@
+.destinations__visual { position: relative; padding: 0 0 54px 70px; }
+[dir="rtl"] .destinations__visual { padding: 0 70px 54px 0; }
+.destinations__map { position: absolute; z-index: 2; width: 210px; min-height: 315px; left: 0; bottom: 0; padding: 16px; overflow: hidden; background: rgba(8, 27, 42, .94); color: #fff; border: 1px solid #ffffff20; border-radius: 16px; box-shadow: 0 24px 55px #071a2840; backdrop-filter: blur(18px); direction: ltr; }
+[dir="rtl"] .destinations__map { left: auto; right: 0; }
+.destinations__map-head { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #ffffff18; }
+.destinations__map-head span { font-size: 7px; letter-spacing: 1.4px; color: #9fb5c1; }
+.destinations__map-head strong { font-size: 9px; color: #e9ddc4; }
+.destinations__map svg { width: 100%; height: 250px; overflow: visible; }
+.destinations__country { fill: #ffffff08; stroke: #ffffff28; stroke-width: 1.2; }
+.destinations__route-line { fill: none; stroke: #e6d8ba; stroke-width: 1.4; stroke-dasharray: 5 7; animation: destination-route 13s linear infinite; }
+.destinations__map circle { fill: #6bc8be; stroke: #0c2635; stroke-width: 3; filter: drop-shadow(0 0 5px #6bc8be); }
+.destinations__map-label { position: absolute; font-size: 7px; letter-spacing: .7px; color: #dce5e9; }
+.destinations__map-label--tunis { top: 64px; right: 36px; }
+.destinations__map-label--sahel { top: 138px; right: 31px; }
+.destinations__map-label--tozeur { top: 220px; left: 27px; }
+.destinations__map-label--djerba { bottom: 28px; right: 34px; }
+@keyframes destination-route { to { stroke-dashoffset: -120; } }
+
+@media (max-width: 768px) {
+  .destinations__visual, [dir="rtl"] .destinations__visual { padding: 0 0 100px; }
+  .destinations__map, [dir="rtl"] .destinations__map { width: 175px; min-height: 250px; left: 16px; right: auto; bottom: 0; }
+  .destinations__map svg { height: 187px; }
+  .destinations__map-label { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .destinations__route-line { animation: none; }
+}

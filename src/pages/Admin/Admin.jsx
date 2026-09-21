@@ -933,7 +933,7 @@ function CustomerProfileCard({ user, reservation, allReservations = [], onClose 
                 }}>
                   {reservation.acceptAlternative ? '✓ Accepte similaire' : '✕ Exige ce modèle'}
                 </span>
-                <span style={{ fontSize: 11.5, padding: '3px 9px', borderRadius: 20, background: 'rgba(212,160,23,0.12)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)', fontWeight: 600 }}>
+                <span style={{ fontSize: 11.5, padding: '3px 9px', borderRadius: 20, background: 'var(--gold-pale)', color: 'var(--gold)', border: '1px solid var(--gold-pale2)', fontWeight: 600 }}>
                   💳 {reservation.paymentOption === 'acompte' ? 'Acompte 10%' : reservation.paymentOption === 'moitie' ? 'Moitié 50%' : 'Totalité 100%'}
                 </span>
               </div>
@@ -952,7 +952,7 @@ function CustomerProfileCard({ user, reservation, allReservations = [], onClose 
                 href={`mailto:${u.email}`}
                 style={{
                   flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  background: 'rgba(212,160,23,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.4)',
+                  background: 'var(--gold-pale)', color: 'var(--gold)', border: '1px solid var(--gold-pale2)',
                   borderRadius: 8, padding: '9px', fontSize: 12, fontWeight: 700, textDecoration: 'none'
                 }}
               >
@@ -1100,16 +1100,16 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    background: showClientProfile ? '#d4a017' : 'rgba(212, 160, 23, 0.15)',
-                    color: showClientProfile ? '#000' : '#d4a017',
-                    border: '1px solid rgba(212, 160, 23, 0.5)',
+                    background: showClientProfile ? 'var(--gold)' : 'var(--gold-pale)',
+                    color: showClientProfile ? 'var(--gold-ink)' : 'var(--gold)',
+                    border: '1px solid var(--gold-pale2)',
                     borderRadius: 20,
                     padding: '4px 12px',
                     fontSize: 12,
                     fontWeight: 700,
                     cursor: 'pointer',
                     transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    boxShadow: '0 2px 8px rgba(212, 160, 23, 0.2)',
+                    boxShadow: '0 2px 8px var(--gold-pale2)',
                   }}
                   title={showClientProfile ? "Fermer le profil client" : "Voir les informations complètes du client"}
                 >
@@ -1135,9 +1135,9 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
                 <span style={{
                   fontSize: 12,
                   fontWeight: 800,
-                  color: '#d4a017',
-                  background: 'rgba(212,160,23,0.15)',
-                  border: '1px solid rgba(212,160,23,0.4)',
+                  color: 'var(--gold)',
+                  background: 'var(--gold-pale)',
+                  border: '1px solid var(--gold-pale2)',
                   borderRadius: 5,
                   padding: '2px 8px',
                   fontFamily: 'monospace',
@@ -2142,9 +2142,9 @@ export default function Admin() {
                             <span style={{
                               fontFamily: 'monospace',
                               fontWeight: 800,
-                              color: '#d4a017',
-                              background: 'rgba(212, 160, 23, 0.15)',
-                              border: '1px solid rgba(212, 160, 23, 0.4)',
+                              color: 'var(--gold)',
+                              background: 'var(--gold-pale)',
+                              border: '1px solid var(--gold-pale2)',
                               borderRadius: 5,
                               padding: '3px 8px',
                               fontSize: 12,

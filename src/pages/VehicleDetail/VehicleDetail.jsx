@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { FiHeart, FiMapPin, FiCalendar, FiUser, FiCheck, FiChevronLeft, FiChevronRight, FiShield, FiInfo, FiChevronUp, FiChevronDown, FiAlertCircle } from 'react-icons/fi'
+import { FiHeart, FiMapPin, FiCalendar, FiUser, FiCheck, FiChevronLeft, FiChevronRight, FiShield, FiChevronUp, FiChevronDown, FiAlertCircle } from 'react-icons/fi'
 import { vehiclesService, reservationsService, holdsService, parcsService } from '../../services/vehiclesService'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -8,7 +8,8 @@ import { useCurrency } from '../../context/CurrencyContext'
 import AdminStrip from '../../components/AdminStrip/AdminStrip'
 import Navbar from '../../components/Navbar/Navbar'
 import Footer from '../../components/Footer/Footer'
-import Car3DViewer from '../../components/Car3DViewer/Car3DViewer'
+import VehicleGallery from '../../components/VehicleGallery/VehicleGallery'
+const Car3DViewer = lazy(() => import('../../components/Car3DViewer/Car3DViewer'))
 import ParcSelect from '../../components/ParcSelect/ParcSelect'
 import './VehicleDetail.css'
 
@@ -48,7 +49,7 @@ export default function VehicleDetail() {
     driverAge: effectiveAge,
   })
   const [submitting, setSubmitting] = useState(false)
-  const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [bookingSuccess] = useState(false)
   const [bookingError, setBookingError] = useState(null)
   const [acceptAlternative, setAcceptAlternative] = useState(true)
   // Track hold id so we can release it if the user cancels, and pass it to
@@ -128,7 +129,7 @@ export default function VehicleDetail() {
     <div className="vd-page">
       <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
         <FiAlertCircle size={40} color="#ef4444" />
-        <p style={{ color: '#374151', marginTop: 12 }}>{error || 'Véhicule introuvable.'}</p>
+        <p style={{ color: 'var(--white-70)', marginTop: 12 }}>{error || 'Véhicule introuvable.'}</p>
         <button onClick={() => navigate('/voitures')} style={{ marginTop: 16, padding: '10px 24px', background: '#1e3a8a', color: '#fff', border: 'none', borderRadius: 7, cursor: 'pointer' }}>← Retour</button>
       </div>
     </div>
@@ -227,7 +228,7 @@ export default function VehicleDetail() {
               <h1 className="vd-title">{car.name}</h1>
               <span className="vd-category">{car.category}</span>
             </div>
-            <button className="vd-heart" onClick={() => setLiked(!liked)}>
+            <button className="vd-heart" aria-label={t('searchResults.favorites', 'Favori')} aria-pressed={liked} onClick={() => setLiked(!liked)}>
               <FiHeart size={20} fill={liked ? '#ef4444' : 'none'} color={liked ? '#ef4444' : '#6b7280'} />
             </button>
           </div>
@@ -259,22 +260,20 @@ export default function VehicleDetail() {
           </div>
 
           {mediaMode === '3d' && car.model3dUrl ? (
-            <Car3DViewer src={car.model3dUrl} carName={car.name} />
+            <Suspense fallback={<div className="sr-skeleton" role="status">3D…</div>}><Car3DViewer src={car.model3dUrl} carName={car.name} /></Suspense>
           ) : (
             <>
-              <div className="vd-photo">
-                <img src={images[activeThumb]} alt={car.name} className="vd-photo__main" />
-              </div>
+<VehicleGallery images={images} active={activeThumb} onChange={setActiveThumb} name={car.name} />
 
               {images.length > 1 && (
                 <div className="vd-thumbs">
-                  <button className="vd-thumbs__arrow" onClick={() => setActiveThumb(p => (p - 1 + images.length) % images.length)}><FiChevronLeft size={16}/></button>
+                  <button className="vd-thumbs__arrow" aria-label={t('categories.prev', 'Précédent')} onClick={() => setActiveThumb(p => (p - 1 + images.length) % images.length)}><FiChevronLeft size={16}/></button>
                   {images.map((img, i) => (
-                    <button key={i} className={`vd-thumb ${activeThumb === i ? 'vd-thumb--active' : ''}`} onClick={() => setActiveThumb(i)}>
+                    <button key={i} aria-pressed={activeThumb === i} className={`vd-thumb ${activeThumb === i ? 'vd-thumb--active' : ''}`} onClick={() => setActiveThumb(i)}>
                       <img src={img} alt={`vue ${i + 1}`} />
                     </button>
                   ))}
-                  <button className="vd-thumbs__arrow" onClick={() => setActiveThumb(p => (p + 1) % images.length)}><FiChevronRight size={16}/></button>
+                  <button className="vd-thumbs__arrow" aria-label={t('categories.next', 'Suivant')} onClick={() => setActiveThumb(p => (p + 1) % images.length)}><FiChevronRight size={16}/></button>
                 </div>
               )}
             </>
@@ -291,7 +290,7 @@ export default function VehicleDetail() {
           {car.description && (
             <div className="vd-section">
               <h3 className="vd-section__title">Description</h3>
-              <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.6 }}>{car.description}</p>
+              <p style={{ fontSize: 13.5, color: 'var(--white-70)', lineHeight: 1.6 }}>{car.description}</p>
             </div>
           )}
 
@@ -439,8 +438,8 @@ export default function VehicleDetail() {
                   display: 'flex', alignItems: 'flex-start', gap: 10,
                   cursor: 'pointer', padding: '10px 12px',
                   borderRadius: 8,
-                  background: acceptAlternative ? 'rgba(212,160,23,0.08)' : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${acceptAlternative ? 'rgba(212,160,23,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                  background: acceptAlternative ? 'var(--gold-pale)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${acceptAlternative ? 'var(--gold-pale2)' : 'rgba(255,255,255,0.08)'}`,
                   marginBottom: 12, transition: 'all 0.2s',
                 }}
               >
@@ -449,11 +448,11 @@ export default function VehicleDetail() {
                   type="checkbox"
                   checked={acceptAlternative}
                   onChange={e => setAcceptAlternative(e.target.checked)}
-                  style={{ marginTop: 2, accentColor: '#d4a017', width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
+                  style={{ marginTop: 2, accentColor: 'var(--gold)', width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
                 />
                 <span style={{ fontSize: 12.5, color: acceptAlternative ? '#e5e7eb' : '#a1a1aa', lineHeight: 1.5 }}>
                   Si ce véhicule n'est pas disponible, j'accepte qu'on me propose{' '}
-                  <strong style={{ color: acceptAlternative ? '#d4a017' : '#71717a' }}>un véhicule similaire</strong>{' '}de la même catégorie.
+                  <strong style={{ color: acceptAlternative ? 'var(--gold)' : '#71717a' }}>un véhicule similaire</strong>{' '}de la même catégorie.
                 </span>
               </label>
 

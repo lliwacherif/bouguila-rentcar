@@ -4,18 +4,33 @@ import { FiUser, FiPhone, FiChevronDown, FiMenu, FiX, FiLogOut, FiGrid, FiClock 
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import CurrencyToggle from '../CurrencyToggle/CurrencyToggle'
-import automedonLogo from '../../assets/Automedon logo.jpg'
+import { AGENCY } from '../../constants/agency'
 import './Navbar.css'
 
-export default function Navbar() {
+export default function Navbar({ home = false }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [langDropdownOpen, setLangDropdownOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { user, openAuthModal, logout } = useAuth()
   const { lang, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const langRef = useRef(null)
   const isAdmin = user?.role === 'admin'
+
+  useEffect(() => { setMobileOpen(false); setLangDropdownOpen(false) }, [location.pathname])
+  useEffect(() => {
+    if (!home) return undefined
+    const onScroll = () => setScrolled(window.scrollY > 42)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [home])
+  useEffect(() => {
+    const dismiss = e => { if (e.key === 'Escape') { setMobileOpen(false); setLangDropdownOpen(false) } }
+    document.addEventListener('keydown', dismiss)
+    return () => document.removeEventListener('keydown', dismiss)
+  }, [])
 
   const navLinks = [
     { key: 'accueil',     href: '/',             label: t('nav.accueil', 'Accueil') },
@@ -41,11 +56,12 @@ export default function Navbar() {
   }
 
   return (
-    <header className="navbar">
+    <header className={`navbar${home ? ' navbar--home' : ''}${scrolled ? ' navbar--scrolled' : ''}`}>
       <div className="navbar__inner container">
         {/* Logo */}
         <Link to="/" className="navbar__logo">
-          <img src={automedonLogo} alt="Automedon Car Rental SaaS" className="navbar__logo-img" />
+          <img src="/images/bouguila-logo.webp" alt="" className="navbar__logo-img" width="49" height="49" />
+          <span className="navbar__wordmark"><strong>BOUGUILA CAR</strong><small>LOCATION · TUNISIE</small></span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -143,21 +159,21 @@ export default function Navbar() {
             </button>
           )}
 
-          <a href="tel:+21629662305" className="navbar__phone">
+          <a href={`tel:${AGENCY.phoneTel}`} className="navbar__phone">
             <FiPhone size={14} />
-            <span>+216 29 662 305</span>
+            <span>{AGENCY.phoneDisplay}</span>
           </a>
         </div>
 
         {/* Mobile Hamburger */}
-        <button className="navbar__hamburger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+        <button className="navbar__hamburger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu" aria-expanded={mobileOpen} aria-controls="mobile-navigation">
           {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="navbar__mobile">
+        <nav id="mobile-navigation" className="navbar__mobile" aria-label={t('nav.accueil', 'Navigation')}>
           <div className="navbar__mobile-toolbar">
             <CurrencyToggle />
             <div className="navbar__mobile-langs">
@@ -207,10 +223,10 @@ export default function Navbar() {
               <FiUser size={14} /> {t('nav.login', 'Se connecter')}
             </button>
           )}
-          <a href="tel:+21629662305" className="navbar__mobile-phone">
-            <FiPhone size={14} /> +216 29 662 305
+          <a href={`tel:${AGENCY.phoneTel}`} className="navbar__mobile-phone">
+            <FiPhone size={14} /> {AGENCY.phoneDisplay}
           </a>
-        </div>
+        </nav>
       )}
     </header>
   )

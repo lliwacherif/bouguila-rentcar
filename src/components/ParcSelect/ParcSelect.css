@@ -31,19 +31,19 @@
 }
 
 .parc-select__trigger:hover {
-  border-color: rgba(212, 160, 23, 0.4);
+  border-color: rgba(59, 111, 181, 0.4);
   background: rgba(255, 255, 255, 0.04);
 }
 
 .parc-select--open .parc-select__trigger {
-  border-color: var(--gold, #d4a017);
-  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+  border-color: var(--gold, #3b6fb5);
+  box-shadow: 0 0 0 3px rgba(59, 111, 181, 0.15);
   background: rgba(20, 20, 22, 0.95);
 }
 
 /* Icon & Value */
 .parc-select__icon {
-  color: var(--gold, #d4a017);
+  color: var(--gold, #3b6fb5);
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
@@ -67,9 +67,9 @@
 
 .parc-select__city {
   font-size: 11px;
-  color: var(--gold, #d4a017);
-  background: rgba(212, 160, 23, 0.12);
-  border: 1px solid rgba(212, 160, 23, 0.25);
+  color: var(--gold, #3b6fb5);
+  background: rgba(59, 111, 181, 0.12);
+  border: 1px solid rgba(59, 111, 181, 0.25);
   padding: 1px 6px;
   border-radius: 4px;
   white-space: nowrap;
@@ -89,7 +89,7 @@
 
 .parc-select--open .parc-select__chevron {
   transform: rotate(180deg);
-  color: var(--gold, #d4a017);
+  color: var(--gold, #3b6fb5);
 }
 
 /* Floating Dropdown Menu */
@@ -100,9 +100,9 @@
   right: 0;
   min-width: 240px;
   background: #141417;
-  border: 1px solid rgba(212, 160, 23, 0.3);
+  border: 1px solid rgba(59, 111, 181, 0.3);
   border-radius: 12px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(212, 160, 23, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(59, 111, 181, 0.08);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 1000;
@@ -134,7 +134,7 @@
   width: 5px;
 }
 .parc-select__list::-webkit-scrollbar-thumb {
-  background: rgba(212, 160, 23, 0.3);
+  background: rgba(59, 111, 181, 0.3);
   border-radius: 4px;
 }
 .parc-select__list::-webkit-scrollbar-track {
@@ -155,14 +155,14 @@
 }
 
 .parc-select__option:hover {
-  background: rgba(212, 160, 23, 0.12);
+  background: rgba(59, 111, 181, 0.12);
   color: #ffffff;
   transform: translateX(2px);
 }
 
 .parc-select__option--selected {
-  background: rgba(212, 160, 23, 0.18);
-  border: 1px solid rgba(212, 160, 23, 0.35);
+  background: rgba(59, 111, 181, 0.18);
+  border: 1px solid rgba(59, 111, 181, 0.35);
   color: #ffffff;
   font-weight: 600;
 }
@@ -175,7 +175,7 @@
 }
 
 .parc-select__option-icon {
-  color: var(--gold, #d4a017);
+  color: var(--gold, #3b6fb5);
   flex-shrink: 0;
   opacity: 0.8;
 }
@@ -199,8 +199,8 @@
 .parc-select__option-badge {
   font-size: 10.5px;
   font-weight: 600;
-  color: #d4a017;
-  background: rgba(212, 160, 23, 0.15);
+  color: #3b6fb5;
+  background: rgba(59, 111, 181, 0.15);
   padding: 2px 7px;
   border-radius: 4px;
   flex-shrink: 0;
@@ -208,7 +208,7 @@
 }
 
 .parc-select__option-check {
-  color: #d4a017;
+  color: #3b6fb5;
   flex-shrink: 0;
 }
 
@@ -242,9 +242,9 @@
   font-weight: 600;
 }
 .parc-select--searchbar .parc-select__city {
-  color: #d4a017;
-  background: rgba(212, 160, 23, 0.15);
-  border: 1px solid rgba(212, 160, 23, 0.3);
+  color: #3b6fb5;
+  background: rgba(59, 111, 181, 0.15);
+  border: 1px solid rgba(59, 111, 181, 0.3);
 }
 .parc-select--searchbar .parc-select__chevron {
   color: rgba(255, 255, 255, 0.5);
