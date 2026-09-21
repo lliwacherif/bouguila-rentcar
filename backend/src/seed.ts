@@ -143,11 +143,12 @@ async function seed() {
 
   // 2. Check / Create Users (ALL PASSWORDS ARE '12345678')
   let createdUsers: any[] = await User.find({}).lean();
+  const defaultPassword = await bcrypt.hash('12345678', 12);
   
   if (createdUsers.length === 0) {
     console.log('👤 No existing users found. Seeding default users...');
-    const defaultPassword = await bcrypt.hash('12345678', 12);
     const usersData: any[] = [
+      { firstName: 'Admin', lastName: 'Bouguila', email: 'admin@bouguila.com', role: 'admin', phone: '+216 29 662 305', age: 35, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200' },
       { firstName: 'Ahmed', lastName: 'Guezguez', email: 'admin@automedon.tn', role: 'admin', phone: '+216 29 662 305', age: 30, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200' },
       { firstName: 'Sonia', lastName: 'Mansour', email: 'manager@automedon.tn', role: 'admin', phone: '+216 29 662 305', age: 35, avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200' },
       { firstName: 'Ahmed', lastName: 'Guezguez', email: 'ahmed@example.com', role: 'customer', phone: '+216 98 765 432', age: 28, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200' },
@@ -164,6 +165,22 @@ async function seed() {
     }
   } else {
     console.log(`👤 Reusing ${createdUsers.length} existing users.`);
+    const existingBouguilaAdmin = await User.findOne({ email: 'admin@bouguila.com' });
+    if (!existingBouguilaAdmin) {
+      const bouguilaAdmin = await User.create({
+        firstName: 'Admin',
+        lastName: 'Bouguila',
+        email: 'admin@bouguila.com',
+        role: 'admin',
+        password: defaultPassword,
+        phone: '+216 29 662 305',
+        age: 35,
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+        isEmailVerified: true,
+      });
+      console.log('👑 Ensured admin profile: admin@bouguila.com — Password: 12345678');
+      createdUsers.push(bouguilaAdmin);
+    }
   }
 
   console.log('');
@@ -619,12 +636,17 @@ async function seed() {
   console.log('✅ FULL DATASET SEED COMPLETED SUCCESSFULLY!');
   console.log('=============================================================');
   console.log('📋 ACCESSIBLE TEST ACCOUNTS (Password for ALL is: 12345678):\n');
-  console.log('   👑 ADMIN ACCOUNT:');
-  console.log('      Email:    admin@tunisiacarrental.com');
-  console.log('      Password: 12345678\n');
-  console.log('   🛠️ MANAGER ACCOUNT:');
-  console.log('      Email:    manager@tunisiacarrental.com');
-  console.log('      Password: 12345678\n');
+  console.log(`   👑 ADMIN ACCOUNTS:
+      Email:    admin@bouguila.com
+      Password: 12345678
+
+      Email:    admin@automedon.tn
+      Password: 12345678
+
+   🛠️ MANAGER ACCOUNT:
+      Email:    manager@automedon.tn
+      Password: 12345678
+`);
   console.log('   👤 CUSTOMER ACCOUNTS:');
   console.log('      1. ahmed@example.com   / 12345678 (Ahmed Guezguez)');
   console.log('      2. fatima@example.com  / 12345678 (Fatima Ben Saïd)');
