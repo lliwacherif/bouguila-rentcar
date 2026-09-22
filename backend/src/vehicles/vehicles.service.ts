@@ -21,7 +21,7 @@ export class VehiclesService {
 
   async create(dto: CreateVehicleDto) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { parcId, ...rest } = dto as any;
+    const { parcId, parc: _populatedParc, ...rest } = dto as any;
     return this.vehicleModel.create({
       ...rest,
       ...(parcId ? { parc: new Types.ObjectId(parcId) } : {}),
@@ -110,7 +110,7 @@ export class VehiclesService {
 
   async update(id: string, dto: UpdateVehicleDto) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { parcId, ...rest } = dto as any;
+    const { parcId, parc: _populatedParc, ...rest } = dto as any;
     const update: Record<string, any> = { ...rest };
     if (parcId !== undefined) {
       update.parc = parcId ? new Types.ObjectId(parcId) : null;

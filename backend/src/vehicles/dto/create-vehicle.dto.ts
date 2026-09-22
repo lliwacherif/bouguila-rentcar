@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString,
+  Allow, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString,
   IsBoolean, IsArray, IsDateString, Min, Max, ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -82,6 +82,11 @@ export class CreateVehicleDto {
 
   @ApiPropertyOptional({ example: '64abc...', description: 'Parc (parking location) ID' })
   @IsOptional() @IsString() parcId?: string;
+
+  /** Populated parc returned by reads. Ignored on create/update; use parcId to assign one. */
+  @Allow()
+  @IsOptional()
+  parc?: unknown;
 
   @ApiPropertyOptional({ example: 21 })
   @IsOptional() @IsNumber() @Min(18) minDriverAge?: number;

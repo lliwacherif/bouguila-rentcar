@@ -395,9 +395,10 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
         nextMaintenanceDate: form.nextMaintenanceDate || undefined,
         acquisitionDate:     form.acquisitionDate     || undefined,
       }
-      // Strip MongoDB metadata and auto-managed fields — DTO will reject them
+      // Strip MongoDB metadata and the populated parc object.
+      // The API accepts parcId, not parc, and rejects unknown fields.
       // eslint-disable-next-line no-unused-vars
-      const { _id, __v, createdAt, updatedAt, status, isActive, ...cleanPayload } = payload
+      const { _id, id, __v, createdAt, updatedAt, status, isActive, parc, ...cleanPayload } = payload
 
       if (vehicle) await vehiclesService.update(vehicle._id, cleanPayload)
       else         await vehiclesService.create(cleanPayload)
