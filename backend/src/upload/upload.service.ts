@@ -1,21 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { randomBytes } from 'crypto';
+import { mkdir, writeFile } from 'fs/promises';
+import { extname, join } from 'path';
 import { Readable } from 'stream';
+
+const PLACEHOLDER = /^(your_|changeme|placeholder|xxx)/i;
 
 @Injectable()
 export class UploadService {
+  private readonly logger = new Logger(UploadService.name);
+  private readonly cloudinaryReady: boolean;
+
   constructor(private readonly configService: ConfigService) {
     // ── Cloudinary (images and raw files) ─────────────────────────────────
-    const cloudName = configService.get<string>('cloudinary.cloudName');
-    const apiKey = configService.get<string>('cloudinary.apiKey');
-    const apiSecret = configService.get<string>('cloudinary.apiSecret');
-    if (cloudName && apiKey && apiSecret) {
+    const cloudName = configService.get<string>('cloudinary.cloudName')?.trim();
+    const apiKey = configService.get<string>('cloudinary.apiKey')?.trim();
+    const apiSecret = configService.get<string>('cloudinary.apiSecret')?.trim();
+    this.cloudinaryReady = Boolean(
+      cloudName && apiKey && apiSecret
+      && !PLACEHOLDER.test(cloudName)
+      && !PLACEHOLDER.test(apiKey)
+      && !PLACEHOLDER.test(apiSecret),
+    );
+    if (this.cloudinaryReady) {
       cloudinary.config({
         cloud_name: cloudName,
         api_key: apiKey,
         api_secret: apiSecret,
       });
+    } else {
+      this.logger.warn('Cloudinary is not configured. Image uploads will be stored locally.');
     }
   }
 
@@ -23,6 +39,27 @@ export class UploadService {
   async uploadImage(
     file: Express.Multer.File,
     folder = 'tunisia-car-rental',
+    baseUrl = '',
+  ): Promise<UploadApiResponse> {
+    if (!file?.buffer?.length) {
+      throw new Error('Upload failed: empty file');
+    }
+
+    if (this.cloudinaryReady) {
+      try {
+        return await this.uploadImageToCloudinary(file, folder);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Cloudinary upload failed';
+        this.logger.error(`Cloudinary image upload failed, saving locally: ${message}`);
+      }
+    }
+
+    return this.saveImageLocally(file, folder, baseUrl);
+  }
+
+  private uploadImageToCloudinary(
+    file: Express.Multer.File,
+    folder: string,
   ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -44,6 +81,36 @@ export class UploadService {
       readable.push(null);
       readable.pipe(uploadStream);
     });
+  }
+
+  private async saveImageLocally(
+    file: Express.Multer.File,
+    folder: string,
+    baseUrl: string,
+  ): Promise<UploadApiResponse> {
+    const safeFolder = folder
+      .split('/')
+      .map((part) => part.replace(/[^a-zA-Z0-9_-]/g, ''))
+      .filter(Boolean)
+      .join('/');
+    const allowed = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+    const rawExt = extname(file.originalname || '').toLowerCase();
+    const extension = allowed.has(rawExt) ? rawExt : '.jpg';
+    const filename = `${Date.now()}-${randomBytes(6).toString('hex')}${extension}`;
+    const relativeDir = safeFolder || 'tunisia-car-rental';
+    const dir = join(process.cwd(), 'uploads', relativeDir);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, filename), file.buffer);
+
+    const publicPath = `/uploads/${relativeDir}/${filename}`;
+    const url = `${baseUrl.replace(/\/$/, '')}${publicPath}`;
+    return {
+      secure_url: url,
+      public_id: `${relativeDir}/${filename.replace(/\.[^.]+$/, '')}`,
+      width: 0,
+      height: 0,
+      format: extension.slice(1),
+    } as UploadApiResponse;
   }
 
   // ── 3D GLB upload → Cloudinary raw upload (Supabase disabled) ───────────

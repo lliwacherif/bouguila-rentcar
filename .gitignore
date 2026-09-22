@@ -17,6 +17,10 @@ lerna-debug.log*
 node_modules
 **/node_modules
 
+# Uploaded vehicle images (local fallback when Cloudinary is not configured)
+uploads
+backend/uploads
+
 # Build outputs
 dist
 **/dist
