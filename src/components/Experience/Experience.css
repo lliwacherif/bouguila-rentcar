@@ -5,7 +5,7 @@
   --gold-pale: #82b8f116; --gold-pale2: #82b8f12b; --gold-30: #82b8f155;
   --white: #f7f9fb; --white-90: #e9f0f4; --white-70: #c1d0da; --white-50: #a6bbc8; --white-30: #91a7b5;
   --sand: #f1eee7; --ink: #102a3c; --muted: #596a73; --blue: #246bb0; --radius: 10px; --radius-md: 16px; --radius-lg: 24px;
-  color: var(--white); background: var(--black); font-family: 'Manrope', 'Inter', sans-serif; min-height: 100vh;
+  color: var(--white); background: var(--black); font-family: 'Manrope', 'Inter', sans-serif; font-size: 16px; line-height: 1.65; min-height: 100vh;
 }
 [dir="rtl"] .public-experience { font-family: 'Cairo', sans-serif; }
 .public-experience .container { max-width: 1300px; padding-inline: 32px; }
@@ -17,9 +17,9 @@
 .public-experience a[href^="tel:"], .public-experience a[href^="mailto:"], .public-experience input[type="email"], .public-experience input[type="tel"] { direction: ltr; unicode-bidi: isolate; }
 .public-experience img { max-width: 100%; }
 .public-experience section[id] { scroll-margin-top: 110px; }
-.eyebrow { display: flex; gap: 10px; align-items: center; font-size: 10px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
+.eyebrow { display: flex; gap: 10px; align-items: center; font-size: 11.5px; letter-spacing: 1.8px; font-weight: 700; text-transform: uppercase; }
 [dir="rtl"] .eyebrow { letter-spacing: 0; font-size: 12px; }
-.experience-button { display: inline-flex; justify-content: center; align-items: center; gap: 22px; background: #f3eee3; color: #102a3c; padding: 16px 23px; border-radius: 8px; font-size: 13px; font-weight: 800; transition: transform .2s,background .2s; }
+.experience-button { display: inline-flex; justify-content: center; align-items: center; gap: 22px; background: #f3eee3; color: #102a3c; padding: 16px 23px; border-radius: 8px; font-size: 14px; font-weight: 800; transition: transform .2s,background .2s; }
 .experience-button:hover { transform: translateY(-3px); background: #fff; }
 .skip-link { position: fixed; inset-inline-start: 20px; top: -100px; z-index: 10000; background: white; color: #102a3c; padding: 12px 22px; border-radius: 8px; }
 .skip-link:focus { top: 12px; }
@@ -37,8 +37,8 @@
 .navbar__wordmark { display: flex; flex-direction: column; line-height: 1.2; direction: ltr; }
 .navbar__wordmark strong { font-size: 16px; letter-spacing: 1.1px; font-weight: 800; }
 .navbar__wordmark small { color: #b4c5cf; font-size: 8px; letter-spacing: 2.5px; margin-top: 5px; }
-.public-experience .navbar__link { font-size: 12px; padding: 10px 12px; }
-.public-experience .navbar__phone { background: #e9e1d0; color: #102a3c; min-height: 42px; font-size: 12px; padding-inline: 16px; }
+.public-experience .navbar__link { font-size: 13.5px; padding: 10px 12px; }
+.public-experience .navbar__phone { background: #e9e1d0; color: #102a3c; min-height: 42px; font-size: 13.5px; padding-inline: 16px; }
 .public-experience .navbar__lang, .public-experience .navbar__user { min-height: 40px; }
 .public-experience .navbar__user { width: 40px; }
 .public-experience .navbar__mobile { background: #102737; animation: menu-enter .22s ease both; max-height: calc(100dvh - 75px); overflow-y: auto; padding-inline: 24px; }
@@ -51,23 +51,23 @@
 .public-experience .booking { position: relative; z-index: 5; padding: 0 32px 26px; background: var(--sand); }
 .public-experience .booking__card { --white: #102a3c; --white-70: #465f70; --white-50: #526774; --white-30: #5c7180; --black-3: #f3f6f7; --black-5: #d7dfe3; --gold: #246bb0; --gold-ink: #fff; --gold-light: #185795; background: #fff; border: 1px solid #e4e6e5; border-radius: 18px; margin-top: -44px; padding: 0; box-shadow: 0 20px 55px #102a3c14; color: var(--ink); }
 .booking__intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 28px 0; }
-.booking__intro h2 { font-size: 18px; letter-spacing: -.3px; }
-.booking__kicker { display: inline-flex; align-items: center; gap: 7px; color: #246bb0; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; margin-bottom: 7px; }
+.booking__intro h2 { font-size: 20px; letter-spacing: -.3px; }
+.booking__kicker { display: inline-flex; align-items: center; gap: 7px; color: #246bb0; font-size: 10.5px; font-weight: 800; letter-spacing: 1.3px; margin-bottom: 7px; }
 .booking__journey { display: flex; align-items: center; gap: 4px; }
-.booking__journey-step { display: flex; align-items: center; gap: 8px; color: #8696a0; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.booking__journey-step { display: flex; align-items: center; gap: 8px; color: #8696a0; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
 .booking__journey-step:not(:last-child)::after { content: ''; width: 34px; height: 1px; margin-inline: 6px; background: #dbe2e5; }
 .booking__journey-step i { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; border: 1px solid #d2dcdf; font-size: 8px; font-style: normal; transition: .3s ease; }
 .booking__journey-step--complete { color: #174f7d; }
 .booking__journey-step--complete i { color: #fff; background: #246bb0; border-color: #246bb0; box-shadow: 0 4px 12px #246bb02e; }
 .booking__journey-step svg { width: 11px; }
 .public-experience .booking__tabs { margin: 20px 28px 0; background: #f0f4f5; border: 0; width: fit-content; max-width: calc(100% - 56px); padding: 4px; border-radius: 8px; overflow: visible; }
-.public-experience .booking__tab { padding: 9px 18px; border: 0; margin: 0; border-radius: 6px; font-size: 12px; color: #566974; white-space: normal; }
+.public-experience .booking__tab { padding: 9px 18px; border: 0; margin: 0; border-radius: 6px; font-size: 13px; color: #566974; white-space: normal; }
 .public-experience .booking__tab--active { background: #fff; color: #175a97; box-shadow: 0 2px 6px #102a3c0c; }
 .public-experience .booking__form { padding: 22px 28px 24px; }
 .public-experience .booking__fields { display: grid; grid-template-columns: minmax(200px,1.6fr) repeat(2,minmax(158px,1fr)) minmax(100px,.65fr) 140px; align-items: end; gap: 12px; }
 .public-experience .booking__field { min-width: 0; }
-.public-experience .booking__label { color: #596d7a; font-size: 9px; letter-spacing: .6px; }
-.public-experience .booking__input, .public-experience .booking .parc-select__trigger { height: 50px; border: 1px solid #d7dfe3; background: #f7f9fa; color: #102a3c; font-size: 13px; color-scheme: light; border-radius: 8px; }
+.public-experience .booking__label { color: #596d7a; font-size: 10.5px; letter-spacing: .5px; }
+.public-experience .booking__input, .public-experience .booking .parc-select__trigger { height: 50px; border: 1px solid #d7dfe3; background: #f7f9fa; color: #102a3c; font-size: 14px; color-scheme: light; border-radius: 8px; }
 .public-experience .booking__input--date { padding-inline: 10px; direction: ltr; }
 .public-experience .booking__input-icon-right { display: none; }
 .public-experience .booking .parc-select { margin-top: 0; }
@@ -85,21 +85,28 @@
 /* Homepage rhythm */
 .public-experience .features { background: var(--sand); border: 0; padding: 92px 0 100px; color: var(--ink); }
 .public-experience .features__item { padding: 29px; border-color: #102a3c12; }
-.public-experience .features__title { color: var(--ink); font-size: 18px; }
-.public-experience .features__desc { color: #586b76; font-size: 13px; }
+.public-experience .features__title { color: var(--ink); font-size: 20px; }
+.public-experience .features__desc { color: #586b76; font-size: 15px; }
 .public-experience .features__icon { color: #276b9d; }
 .public-experience .categories { background: #081b2a; padding: 85px 0; border: 0; }
 .categories__eyebrow { color: #97b9ca; margin-bottom: 12px; }
-.public-experience .categories__title { font-size: clamp(26px,3vw,39px); letter-spacing: -1px; font-weight: 600; }
+.public-experience .categories__title { font-size: clamp(29px,3vw,42px); letter-spacing: -1px; font-weight: 600; }
 .public-experience .categories__header { margin-bottom: 36px; align-items: flex-end; gap: 20px; }
-.public-experience .categories__view-all { color: #ddd2ba; border-bottom: 1px solid #ddd2ba50; padding-bottom: 6px; }
+.public-experience .categories__subtitle { font-size: 14px; line-height: 1.7; }
+.public-experience .categories__view-all { color: #ddd2ba; border-bottom: 1px solid #ddd2ba50; padding-bottom: 6px; font-size: 13px; }
 .public-experience .categories__slider { gap: 20px; padding: 8px 0 16px; }
 .public-experience .categories__card { width: 300px; border: 1px solid #ffffff17; background: #122b3b; border-radius: 16px; text-align: start; color: inherit; }
 .public-experience .categories__card-img-wrap { height: 205px; background: #e7eced; padding: 0; }
 .public-experience .categories__card-img { object-fit: cover; width: 100%; height: 100%; }
 .public-experience .categories__card-info { padding: 21px; border: 0; }
-.public-experience .categories__card-name { font-size: 17px; margin-bottom: 8px; }
-.public-experience .categories__card-price { font-size: 12px; color: #b7cbd8; }
+.public-experience .categories__card-name { font-size: 19px; margin-bottom: 8px; }
+.public-experience .categories__card-heading > span { font-size: 12px; }
+.public-experience .categories__card-specs span { font-size: 11px; }
+.public-experience .categories__availability, .public-experience .categories__category { font-size: 9.5px; }
+.public-experience .categories__card-footer small { font-size: 10px; }
+.public-experience .categories__card-footer strong { font-size: 21px; }
+.public-experience .categories__card-link { font-size: 11px; }
+.public-experience .categories__card-price { font-size: 13px; color: #b7cbd8; }
 .public-experience .categories__arrow { background: #eff0e9; color: #102a3c; border: 0; width: 40px; height: 40px; }
 .public-experience .categories--expanded .categories__slider { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); overflow: visible; }
 .public-experience .categories--expanded .categories__card { width: auto; min-width: 0; flex: 0 1 auto; }
@@ -108,9 +115,9 @@
 .destinations .eyebrow { color: #617d88; margin-bottom: 24px; }
 .destinations h2 { font-size: clamp(31px,3.4vw,46px); line-height: 1.16; letter-spacing: -1.7px; font-weight: 600; margin-bottom: 24px; }
 .destinations h2 em { font-family: 'Cormorant Garamond',Georgia,serif; font-weight: 500; }
-.destinations p { font-size: 14px; line-height: 1.9; color: #5b6b72; max-width: 390px; }
-.destinations__link { display: inline-flex; gap: 24px; align-items: center; font-size: 13px; font-weight: 800; margin: 26px 0 38px; border-bottom: 1px solid #102a3c50; padding-bottom: 10px; }
-.destinations__places { display: flex; gap: 22px; font-size: 10px; color: #596d75; border-top: 1px solid #102a3c20; padding-top: 20px; flex-wrap: wrap; }
+.destinations p { font-size: 15.5px; line-height: 1.9; color: #5b6b72; max-width: 430px; }
+.destinations__link { display: inline-flex; gap: 24px; align-items: center; font-size: 14px; font-weight: 800; margin: 26px 0 38px; border-bottom: 1px solid #102a3c50; padding-bottom: 10px; }
+.destinations__places { display: flex; gap: 22px; font-size: 11.5px; color: #596d75; border-top: 1px solid #102a3c20; padding-top: 20px; flex-wrap: wrap; }
 .destinations__photo { position: relative; border-radius: 120px 14px 14px 14px; overflow: hidden; }
 .destinations__photo img { width: 100%; height: 465px; object-fit: cover; transition: transform .8s; }
 .destinations__photo:hover img { transform: scale(1.025); }
@@ -160,11 +167,11 @@
 .public-experience .sr-searchbar { padding: 24px 0; background: #102737; }
 .public-experience .sr-searchbar__inner { border-radius: 14px; padding: 8px; background: #173344; border-color: #ffffff20; }
 .public-experience .sr-searchbar__btn { border-radius: 8px; background: #e9dfca; color: #102a3c; min-height: 52px; }
-.public-experience .sr-searchbar__field-label { font-size: 9px; color: #b6c8d3; }
+.public-experience .sr-searchbar__field-label { font-size: 10.5px; color: #b6c8d3; }
 .public-experience .sr-body { gap: 32px; padding-block: 40px 70px; }
 .public-experience .sr-sidebar { width: 235px; position: sticky; top: 102px; max-height: calc(100dvh - 118px); overflow-y: auto; scrollbar-width: thin; }
 .public-experience .sr-recap, .public-experience .sr-filters { background: #102737; border-color: #ffffff16; border-radius: 14px; }
-.public-experience .sr-filter-check { min-height: 28px; font-size: 13px; }
+.public-experience .sr-filter-check { min-height: 28px; font-size: 14px; }
 .public-experience .sr-filter-check input { width: 17px; height: 17px; }
 .public-experience .sr-main__count { font-size: 23px; font-weight: 600; }
 .public-experience .sr-list { gap: 22px; }
@@ -174,7 +181,7 @@
 .public-experience .sr-card__img { height: 100%; min-height: 225px; object-fit: cover; transition: transform .5s; }
 .public-experience .sr-card:hover .sr-card__img { transform: scale(1.03); }
 .public-experience .sr-card__body { padding: 25px 20px; }
-.public-experience .sr-card__name { font-size: 19px; margin-block: 7px 16px; }
+.public-experience .sr-card__name { font-size: 21px; margin-block: 7px 16px; }
 .public-experience .sr-card__specs { gap: 10px; }
 .public-experience .sr-card__features { margin-block: 14px; }
 .public-experience .sr-card__badge { background: #ffffff09 !important; color: #b6d3e8 !important; border-color: #ffffff25 !important; }
@@ -187,7 +194,7 @@
 .public-experience .sr-empty { padding: 80px 24px; border: 1px dashed #7893a455; border-radius: 20px; }
 .public-experience .vd-body { padding-top: 45px; padding-bottom: 65px; gap: 35px; }
 .public-experience .vd-title { font-size: 36px; letter-spacing: -1px; }
-.public-experience .vd-spec { background: #173344; border-radius: 30px; padding: 8px 13px; font-size: 12px; }
+.public-experience .vd-spec { background: #173344; border-radius: 30px; padding: 8px 13px; font-size: 13px; }
 .public-experience .vd-specs { gap: 8px; }
 .public-experience .vd-photo { height: 410px; border-radius: 20px; border-color: #ffffff20; background: #173344; position: relative; }
 .public-experience .vd-photo__main { padding: 0; animation: photo-in .3s ease; }
@@ -222,12 +229,12 @@
 /* Guide, contact, auth, footer */
 .public-experience .guide-container, .public-experience .contact-container { padding-top: 62px; padding-bottom: 72px; }
 .public-experience .guide-title, .public-experience .contact-title { font-size: clamp(30px,3.4vw,48px); font-weight: 600; text-transform: none; letter-spacing: -1px; }
-.public-experience .guide-subtitle, .public-experience .contact-subtitle { color: #b9ccd8; font-size: 15px; line-height: 1.8; max-width: 720px; margin-inline: auto; }
+.public-experience .guide-subtitle, .public-experience .contact-subtitle { color: #b9ccd8; font-size: 16px; line-height: 1.8; max-width: 720px; margin-inline: auto; }
 .public-experience .guide-timeline-img-card { border-radius: 20px; }
 .public-experience .guide-timeline-img-card img { aspect-ratio: 3/2; object-fit: cover; }
 .public-experience .guide-timeline-text-card { background: #112d40; border: 1px solid #ffffff15; border-radius: 18px; padding: 32px; }
 .public-experience .guide-timeline-title { font-size: 23px; }
-.public-experience .guide-timeline-desc { color: #bacbd6; font-size: 14px; line-height: 1.85; }
+.public-experience .guide-timeline-desc { color: #bacbd6; font-size: 15px; line-height: 1.85; }
 .public-experience .guide-status-box, .public-experience .guide-faq-item { border-radius: 12px; }
 .public-experience .guide-faq-question { width: 100%; background: transparent; color: inherit; border: 0; text-align: start; font-family: inherit; cursor: pointer; }
 .public-experience .guide-cta-card { padding: 36px; border-radius: 20px; background: #183d51; }
@@ -238,13 +245,13 @@
 .public-experience .contact-info-card, .public-experience .contact-card-panel { border: 1px solid #ffffff18; background: #102737; border-radius: 16px; }
 .public-experience .contact-info-value { overflow-wrap: anywhere; }
 .public-experience .contact-feat-card { background: #173344; border-color: #ffffff15; border-radius: 12px; }
-.public-experience .contact-form :is(input,textarea) { border-radius: 10px; border: 1px solid #426073; min-height: 48px; color: #fff; font-size: 14px; }
+.public-experience .contact-form :is(input,textarea) { border-radius: 10px; border: 1px solid #426073; min-height: 48px; color: #fff; font-size: 15px; }
 .public-experience .am-card { border-radius: 24px; background: #102737; border-color: #ffffff24; }
 .public-experience .am-panel--form { background: #102737; }
 .public-experience .am-panel__inner { padding: 32px; height: auto; min-height: 100%; gap: 10px; }
 .public-experience .am-title { font-size: 29px; font-weight: 600; }
 .public-experience .am-input { background: #183849; border: 1px solid #416073; border-radius: 8px; padding: 11px 12px; min-height: 44px; }
-.public-experience .am-label { color: #c3d3dd; font-size: 10px; margin-bottom: 4px; }
+.public-experience .am-label { color: #c3d3dd; font-size: 11.5px; margin-bottom: 4px; }
 .public-experience .am-form { gap: 12px; }
 .public-experience .am-submit { min-height: 48px; background: #e9dfca; color: #102a3c; }
 .public-experience .am-logo-img { background: white; border-radius: 10px; padding: 3px; width: 48px; height: 48px; }
@@ -255,8 +262,9 @@
 .public-experience .footer { background: #061722; border-color: #ffffff15; }
 .public-experience .footer__top { padding: 65px 32px 50px; grid-template-columns: 1.5fr .85fr .9fr 1.4fr 1.1fr; gap: 30px; }
 .public-experience .footer__logo-img { background: #fff; width: 64px; height: 64px; border-radius: 12px; padding: 3px; }
-.public-experience .footer__col-title { font-size: 12px; }
-.public-experience .footer__link, .public-experience .footer__address, .public-experience .footer__brand-desc, .public-experience .footer__newsletter-desc { font-size: 12px; line-height: 1.8; color: #9fb4c1; overflow-wrap: anywhere; }
+.public-experience .footer__col-title { font-size: 14px; }
+.public-experience .footer__link, .public-experience .footer__address, .public-experience .footer__brand-desc, .public-experience .footer__newsletter-desc { font-size: 14px; line-height: 1.75; color: #aebfca; overflow-wrap: anywhere; }
+.public-experience .footer__copyright { font-size: 13px; }
 .public-experience .footer__newsletter-input { min-height: 46px; }
 .public-experience .footer__social { width: 40px; height: 40px; }
 .public-experience .footer__bottom { border-color: #ffffff12; padding: 24px 0; }
@@ -311,12 +319,12 @@
   .booking__intro h2 { font-size: 19px; }
   .booking__intro > span { font-size: 11px; }
   .public-experience .booking__tabs { margin: 18px 20px 0; width: auto; max-width: none; display: grid; grid-template-columns: 1fr 1fr; }
-  .public-experience .booking__tab { font-size: 10px; padding: 10px 6px; line-height: 1.5; min-width: 0; }
+  .public-experience .booking__tab { font-size: 12px; padding: 10px 6px; line-height: 1.5; min-width: 0; }
   .public-experience .booking__form { padding: 20px; }
   .public-experience .booking__fields { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 15px 10px; }
   .public-experience .booking__field--wide, .public-experience .booking__field--narrow, .public-experience .booking__field--btn { grid-column: 1/-1; }
   .public-experience .booking__input { font-size: 16px; }
-  .public-experience .booking__label { font-size: 9px; min-height: 28px; display: flex; align-items: end; }
+  .public-experience .booking__label { font-size: 10.5px; min-height: 28px; display: flex; align-items: end; }
   .public-experience .booking__label--hidden { display: none; }
   .public-experience .booking__input--date { font-size: 13px; padding-inline: 5px; width: 100%; max-width: 100%; }
   .public-experience .booking__input--date::-webkit-date-and-time-value { text-align: start; }
@@ -324,8 +332,8 @@
   .public-experience .features__item { padding: 25px; }
   .public-experience .categories { padding: 55px 0; }
   .public-experience .categories__header { align-items: start; }
-  .public-experience .categories__title { font-size: 28px; }
-  .public-experience .categories__view-all { font-size: 11px; max-width: 110px; }
+  .public-experience .categories__title { font-size: 30px; }
+  .public-experience .categories__view-all { font-size: 12.5px; max-width: 130px; }
   .public-experience .categories__card { width: 270px; }
   .public-experience .categories--expanded .categories__slider { grid-template-columns: 1fr; }
   .public-experience .categories--expanded .categories__card { width: 100%; }
@@ -360,7 +368,7 @@
   .public-experience .sr-card__heart { top: 12px; }
   .public-experience .sr-card__pricing { min-width: 110px; padding-top: 7px; }
   .public-experience .sr-card__price { font-size: 24px; }
-  .public-experience .sr-card__btn { font-size: 11px; }
+  .public-experience .sr-card__btn { font-size: 13px; }
   .public-experience .vd-title { font-size: 29px; }
   .public-experience .vd-details { grid-template-columns: 1fr; }
   .public-experience .vd-photo { height: 275px; }

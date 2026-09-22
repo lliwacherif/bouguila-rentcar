@@ -5,7 +5,9 @@ const LanguageContext = createContext()
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
-    return localStorage.getItem('app_lang') || 'ar'
+    const savedLang = localStorage.getItem('app_lang')
+    const hasExplicitPreference = localStorage.getItem('app_lang_explicit') === '1'
+    return hasExplicitPreference && (savedLang === 'fr' || savedLang === 'ar') ? savedLang : 'fr'
   })
 
   // Synchronize document dir (RTL/LTR) & lang attribute whenever language changes
@@ -24,6 +26,7 @@ export function LanguageProvider({ children }) {
 
   const setLanguage = (newLang) => {
     if (newLang === 'fr' || newLang === 'ar') {
+      localStorage.setItem('app_lang_explicit', '1')
       setLang(newLang)
     }
   }

@@ -61,8 +61,8 @@ export default function Home() {
       <main className="home-main">
         <Hero />
         <BookingForm />
-        <Features />
         <CarCategories />
+        <Features />
         <Destinations />
         <Concierge />
       </main>
