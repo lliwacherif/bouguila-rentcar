@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowUpRight, FiBriefcase, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp, FiRefreshCw, FiUsers } from 'react-icons/fi'
 import { vehiclesService } from '../../services/vehiclesService'
+import { mediaUrl } from '../../services/api'
 import { useLanguage } from '../../context/LanguageContext'
 import { useCurrency } from '../../context/CurrencyContext'
 import './CarCategories.css'
@@ -97,7 +98,7 @@ export default function CarCategories() {
                     >
                       <div className="categories__card-img-wrap">
                         <img
-                          src={vehicle.images?.[0] || FALLBACK_IMAGES[vehicle.category] || '/images/car_citadine.webp'}
+                          src={mediaUrl(vehicle.images?.[0]) || FALLBACK_IMAGES[vehicle.category] || '/images/car_citadine.webp'}
                           alt={vehicle.name}
                           loading="lazy"
                           decoding="async"

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { FiHeart, FiMapPin, FiCalendar, FiUser, FiCheck, FiChevronLeft, FiChevronRight, FiShield, FiChevronUp, FiChevronDown, FiAlertCircle } from 'react-icons/fi'
 import { vehiclesService, reservationsService, holdsService, parcsService } from '../../services/vehiclesService'
+import { mediaUrl } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useCurrency } from '../../context/CurrencyContext'
@@ -326,7 +327,7 @@ export default function VehicleDetail() {
                   <button className="vd-thumbs__arrow" aria-label={t('categories.prev', 'Précédent')} onClick={() => setActiveThumb(p => (p - 1 + images.length) % images.length)}><FiChevronLeft size={16}/></button>
                   {images.map((img, i) => (
                     <button key={i} aria-pressed={activeThumb === i} className={`vd-thumb ${activeThumb === i ? 'vd-thumb--active' : ''}`} onClick={() => setActiveThumb(i)}>
-                      <img src={img} alt={`vue ${i + 1}`} />
+                      <img src={mediaUrl(img)} alt={`vue ${i + 1}`} />
                     </button>
                   ))}
                   <button className="vd-thumbs__arrow" aria-label={t('categories.next', 'Suivant')} onClick={() => setActiveThumb(p => (p + 1) % images.length)}><FiChevronRight size={16}/></button>

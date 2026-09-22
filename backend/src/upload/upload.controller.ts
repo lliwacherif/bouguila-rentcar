@@ -1,7 +1,7 @@
 import {
   Controller, Post, Delete, Param,
   UploadedFile, UseGuards, UseInterceptors,
-  BadRequestException,   Body, Req,
+  BadRequestException,   Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -13,7 +13,6 @@ import { UploadService } from './upload.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import type { Request } from 'express';
 
 /** Multer file type filter — only allow image MIME types */
 const imageFilter = (_req: any, file: Express.Multer.File, cb: any) => {
@@ -95,13 +94,9 @@ export class UploadController {
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
     @Body('folder') folder?: string,
-    @Req() req?: Request,
   ) {
     if (!file) throw new BadRequestException('No file provided');
-    const forwarded = req?.headers['x-forwarded-proto'];
-    const proto = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0] || req?.protocol || 'http';
-    const baseUrl = `${proto}://${req?.get('host') || 'localhost:3000'}`;
-    const result = await this.uploadService.uploadImage(file, folder, baseUrl);
+    const result = await this.uploadService.uploadImage(file, folder);
     return {
       url: result.secure_url,
       publicId: result.public_id,

@@ -6,6 +6,7 @@ import {
   FiDollarSign, FiBarChart2, FiUpload, FiStar, FiClock, FiList, FiTool, FiUser,
 } from 'react-icons/fi'
 import { vehiclesService, reservationsService, uploadService, parcsService } from '../../services/vehiclesService'
+import { mediaUrl } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useCurrency } from '../../context/CurrencyContext'
 import AdminStrip from '../../components/AdminStrip/AdminStrip'
@@ -291,6 +292,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
     setUploading(true)
     try {
       const r = await uploadService.uploadImage(file, 'tunisia-car-rental/vehicles')
+      if (!r?.url) throw new Error('Réponse image invalide')
       setImages(p => [...p, r.url])
     } catch { setError('Erreur upload image.') }
     finally { setUploading(false) }
@@ -520,7 +522,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
                 <div className="vm-images">
                   {images.map((url, i) => (
                     <div key={i} className="vm-image-thumb">
-                      <img src={url} alt={`photo ${i + 1}`} />
+                      <img src={mediaUrl(url)} alt={`photo ${i + 1}`} />
                       <button type="button" className="vm-image-remove" onClick={() => setImages(p => p.filter((_, j) => j !== i))}><FiX size={11}/></button>
                     </div>
                   ))}
@@ -721,7 +723,7 @@ function HistoryModal({ vehicle, onClose }) {
         <div className="hist-vehicle-info">
           <div className="hist-thumb">
             {vehicle.images?.[0]
-              ? <img src={vehicle.images[0]} alt={vehicle.name}/>
+              ? <img src={mediaUrl(vehicle.images[0])} alt={vehicle.name}/>
               : <span style={{ fontSize: 32 }}>🚗</span>}
           </div>
           <div className="hist-kpis">
@@ -1143,7 +1145,7 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
           <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 8 }}>
             {reservation.vehicle?.images?.[0] && (
               <div style={{ width: 60, height: 40, borderRadius: 6, overflow: 'hidden', background: 'var(--black-4)', flexShrink: 0 }}>
-                <img src={reservation.vehicle.images[0]} alt={reservation.vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src={mediaUrl(reservation.vehicle.images[0])} alt={reservation.vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             )}
             <div>
@@ -1779,7 +1781,7 @@ export default function Admin() {
                           <td>
                             <div className="admin-table__vehicle">
                               <div className="admin-table__car-img">
-                                {v.images?.[0] ? <img src={v.images[0]} alt={v.name}/> : <span>🚗</span>}
+                                {v.images?.[0] ? <img src={mediaUrl(v.images[0])} alt={v.name}/> : <span>🚗</span>}
                               </div>
                               <div>
                                 <div className="admin-table__car-name">{i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : ''}{v.name || '—'}</div>
@@ -2039,7 +2041,7 @@ export default function Admin() {
                         <td>
                           <div className="admin-table__vehicle">
                             <div className="admin-table__car-img">
-                              {v.images?.[0] ? <img src={v.images[0]} alt={v.name}/> : <span style={{ fontSize: 18 }}>🚗</span>}
+                              {v.images?.[0] ? <img src={mediaUrl(v.images[0])} alt={v.name}/> : <span style={{ fontSize: 18 }}>🚗</span>}
                             </div>
                             <div>
                               <div className="admin-table__car-name">{v.name}</div>
@@ -2365,7 +2367,7 @@ export default function Admin() {
                   <div key={v._id} className="admin-avail-row" style={{ opacity: v.isActive ? 1 : 0.45 }}>
                     <div className="admin-avail-row__car-col">
                       <div className="admin-avail-row__car-img">
-                        {v.images?.[0] ? <img src={v.images[0]} alt={v.name}/> : <span style={{ fontSize: 16 }}>🚗</span>}
+                        {v.images?.[0] ? <img src={mediaUrl(v.images[0])} alt={v.name}/> : <span style={{ fontSize: 16 }}>🚗</span>}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
                         <span className="admin-avail-row__car-name">{v.name}</span>
@@ -2521,7 +2523,7 @@ export default function Admin() {
                     onDragEnd={() => setDraggedVehicle(null)}
                   >
                     {v.images?.[0]
-                      ? <img src={v.images[0]} alt={v.name} className="parc-vehicle-card__img" />
+                      ? <img src={mediaUrl(v.images[0])} alt={v.name} className="parc-vehicle-card__img" />
                       : <div className="parc-vehicle-card__img parc-vehicle-card__img--placeholder">🚗</div>
                     }
                     <div className="parc-vehicle-card__info">
@@ -2595,7 +2597,7 @@ export default function Admin() {
                         onDragEnd={() => setDraggedVehicle(null)}
                       >
                         {v.images?.[0]
-                          ? <img src={v.images[0]} alt={v.name} className="parc-vehicle-card__img" />
+                          ? <img src={mediaUrl(v.images[0])} alt={v.name} className="parc-vehicle-card__img" />
                           : <div className="parc-vehicle-card__img parc-vehicle-card__img--placeholder">🚗</div>
                         }
                         <div className="parc-vehicle-card__info">

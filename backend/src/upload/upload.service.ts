@@ -39,7 +39,6 @@ export class UploadService {
   async uploadImage(
     file: Express.Multer.File,
     folder = 'tunisia-car-rental',
-    baseUrl = '',
   ): Promise<UploadApiResponse> {
     if (!file?.buffer?.length) {
       throw new Error('Upload failed: empty file');
@@ -54,7 +53,7 @@ export class UploadService {
       }
     }
 
-    return this.saveImageLocally(file, folder, baseUrl);
+    return this.saveImageLocally(file, folder);
   }
 
   private uploadImageToCloudinary(
@@ -86,7 +85,6 @@ export class UploadService {
   private async saveImageLocally(
     file: Express.Multer.File,
     folder: string,
-    baseUrl: string,
   ): Promise<UploadApiResponse> {
     const safeFolder = folder
       .split('/')
@@ -102,10 +100,9 @@ export class UploadService {
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, filename), file.buffer);
 
-    const publicPath = `/uploads/${relativeDir}/${filename}`;
-    const url = `${baseUrl.replace(/\/$/, '')}${publicPath}`;
+    const publicPath = `/api/uploads/${relativeDir}/${filename}`;
     return {
-      secure_url: url,
+      secure_url: publicPath,
       public_id: `${relativeDir}/${filename.replace(/\.[^.]+$/, '')}`,
       width: 0,
       height: 0,
