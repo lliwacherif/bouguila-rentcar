@@ -30,8 +30,21 @@ export class Reservation {
   @Prop({ type: Types.ObjectId, ref: 'Vehicle', required: true })
   vehicle: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
+
+  /** True when the booking was made without an account. */
+  @Prop({ default: false })
+  isGuest: boolean;
+
+  @Prop({ trim: true })
+  guestName?: string;
+
+  @Prop({ trim: true })
+  guestPhone?: string;
+
+  @Prop({ trim: true, lowercase: true })
+  guestEmail?: string;
 
   // ── Logistics ─────────────────────────────────────────────────────────────
   @Prop({ required: true, trim: true })

@@ -36,6 +36,22 @@ function StatusDot({ status }) {
   )
 }
 
+function clientContact(r) {
+  const accountName = `${r?.user?.firstName || ''} ${r?.user?.lastName || ''}`.trim()
+  if (accountName) {
+    return {
+      name: accountName,
+      detail: r.user?.email || r.user?.phone || '',
+      isGuest: false,
+    }
+  }
+  if (r?.isGuest || r?.guestName || r?.guestPhone) {
+    const detail = [r.guestPhone, r.guestEmail].filter(Boolean).join(' · ')
+    return { name: r.guestName || 'Visiteur', detail, isGuest: true }
+  }
+  return { name: '—', detail: '', isGuest: false }
+}
+
 function ResBadge({ status }) {
   const map = {
     recu:      { bg: 'rgba(59,130,246,.15)',  c: '#60a5fa', l: 'Reçu'      },
@@ -757,8 +773,8 @@ function HistoryModal({ vehicle, onClose }) {
                 {history.map(r => (
                   <tr key={r._id} className="admin-table__row">
                     <td>
-                      <div className="admin-table__car-name">{r.user?.firstName} {r.user?.lastName}</div>
-                      <div className="admin-table__car-year">{r.user?.email}</div>
+                      <div className="admin-table__car-name">{clientContact(r).name}{clientContact(r).isGuest ? ' · Visiteur' : ''}</div>
+                      <div className="admin-table__car-year">{clientContact(r).detail}</div>
                     </td>
                     <td style={{ fontSize: 12, color: 'var(--white-70)' }}>{fmtDate(r.pickupDate)}</td>
                     <td style={{ fontSize: 12, color: 'var(--white-70)' }}>{fmtDate(r.dropoffDate)}</td>
@@ -1131,7 +1147,7 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
             )}
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--white)', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span>{reservation.user?.firstName} {reservation.user?.lastName} · {reservation.vehicle?.name}</span>
+                <span>{clientContact(reservation).name}{clientContact(reservation).isGuest ? ' · Visiteur' : ''} · {reservation.vehicle?.name}</span>
                 <span style={{
                   fontSize: 12,
                   fontWeight: 800,
@@ -1149,6 +1165,11 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
               <div style={{ fontSize: 12, color: 'var(--white-50)', marginTop: 2 }}>
                 {fmtDate(reservation.pickupDate)} → {fmtDate(reservation.dropoffDate)} ({reservation.totalDays} jours)
               </div>
+              {clientContact(reservation).isGuest && (
+                <div style={{ fontSize: 12, color: 'var(--white-70)', marginTop: 4 }}>
+                  {clientContact(reservation).detail || 'Visiteur'}
+                </div>
+              )}
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 12 }}>
@@ -1509,8 +1530,9 @@ export default function Admin() {
     const q = resSearchQuery.toLowerCase().trim()
     const resCode = `#tcr-${r._id?.slice(-6)}`.toLowerCase()
     const fullId = String(r._id || '').toLowerCase()
-    const clientName = `${r.user?.firstName || ''} ${r.user?.lastName || ''}`.toLowerCase()
-    const clientEmail = String(r.user?.email || '').toLowerCase()
+    const contact = clientContact(r)
+    const clientName = contact.name.toLowerCase()
+    const clientEmail = `${r.user?.email || ''} ${r.user?.phone || ''} ${r.guestEmail || ''} ${r.guestPhone || ''} ${r.guestName || ''}`.toLowerCase()
     const carName = String(r.vehicle?.name || '').toLowerCase()
     const carPlate = String(r.vehicle?.plate || '').toLowerCase()
     return resCode.includes(q) || fullId.includes(q) || clientName.includes(q) || clientEmail.includes(q) || carName.includes(q) || carPlate.includes(q)
@@ -1526,6 +1548,8 @@ export default function Admin() {
   const [historyModal, setHistoryModal] = useState(null)
   const [statusModal, setStatusModal] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [confirmDeleteRes, setConfirmDeleteRes] = useState(null)
+  const [deletingResId, setDeletingResId] = useState(null)
   const [vehicleFilterStatus, setVehicleFilterStatus] = useState('all')
   const [vehicleSortBy, setVehicleSortBy] = useState('name')
   const [togglingVehicleId, setTogglingVehicleId] = useState(null)
@@ -1604,6 +1628,27 @@ export default function Admin() {
       setTimeout(() => loadData(), 800)
     } catch (e) {
       alert('Impossible de supprimer: ' + (e?.message || 'erreur inconnue'))
+    }
+  }
+
+  const handleDeleteReservation = async (reservation) => {
+    setDeletingResId(reservation._id)
+    try {
+      await reservationsService.remove(reservation._id)
+      setAllReservations(prev => prev.filter(r => r._id !== reservation._id))
+      setUpcomingRes(prev => prev.filter(r => r._id !== reservation._id))
+      setConfirmDeleteRes(null)
+      setStatusModal(prev => (prev?._id === reservation._id ? null : prev))
+      try {
+        const st = await reservationsService.getStats()
+        setStats(st)
+      } catch { /* stats refresh is optional */ }
+      if (activeTab === 'calendar') loadCalendarData()
+    } catch (e) {
+      const msg = e?.response?.data?.message
+      alert('Impossible de supprimer la réservation: ' + (Array.isArray(msg) ? msg[0] : msg || e?.message || 'erreur inconnue'))
+    } finally {
+      setDeletingResId(null)
     }
   }
 
@@ -1787,8 +1832,8 @@ export default function Admin() {
                     {(stats?.recentActivity || []).slice(0, 8).map(r => (
                       <tr key={r._id} className="admin-table__row">
                         <td>
-                          <div className="admin-table__car-name">{r.user?.firstName} {r.user?.lastName}</div>
-                          <div className="admin-table__car-year">{r.user?.email}</div>
+                          <div className="admin-table__car-name">{clientContact(r).name}{clientContact(r).isGuest ? ' · Visiteur' : ''}</div>
+                          <div className="admin-table__car-year">{clientContact(r).detail}</div>
                         </td>
                         <td className="admin-table__car-name">{r.vehicle?.name || '—'}</td>
                         <td style={{ fontSize: 11.5, color: 'var(--white-50)' }}>
@@ -1827,7 +1872,7 @@ export default function Admin() {
                           </div>
                           <div className="res-item__info">
                             <div className="res-item__top">
-                              <span className="res-item__client">{r.user?.firstName} {r.user?.lastName}</span>
+                              <span className="res-item__client">{clientContact(r).name}</span>
                               <ResBadge status={r.status}/>
                             </div>
                             <span className="res-item__car">{r.vehicle?.name}</span>
@@ -2166,8 +2211,8 @@ export default function Admin() {
                           </div>
                         </td>
                         <td>
-                          <div className="admin-table__car-name">{r.user?.firstName} {r.user?.lastName}</div>
-                          <div className="admin-table__car-year">{r.user?.email}</div>
+                          <div className="admin-table__car-name">{clientContact(r).name}{clientContact(r).isGuest ? ' · Visiteur' : ''}</div>
+                          <div className="admin-table__car-year">{clientContact(r).detail}</div>
                         </td>
                         <td>
                           <div className="admin-table__car-name">{r.vehicle?.name || '—'}</div>
@@ -2189,9 +2234,40 @@ export default function Admin() {
                         <td><PayBadge status={r.paymentStatus}/></td>
                         <td><ResBadge status={r.status}/></td>
                         <td>
-                          <button className="admin-table__action" onClick={() => setStatusModal(r)}>
-                            <FiEdit2 size={12}/> Gérer
-                          </button>
+                          <div className="admin-table__actions">
+                            <button className="admin-table__action" onClick={() => setStatusModal(r)}>
+                              <FiEdit2 size={12}/> Gérer
+                            </button>
+                            {confirmDeleteRes === r._id ? (
+                              <>
+                                <button
+                                  className="admin-table__action admin-table__action--danger"
+                                  onClick={() => handleDeleteReservation(r)}
+                                  disabled={deletingResId === r._id}
+                                  title="Confirmer la suppression"
+                                >
+                                  <FiCheck size={12}/> Oui
+                                </button>
+                                <button
+                                  className="admin-table__action"
+                                  onClick={() => setConfirmDeleteRes(null)}
+                                  disabled={deletingResId === r._id}
+                                  title="Annuler"
+                                >
+                                  <FiX size={12}/> Non
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                className="admin-table__action admin-table__action--danger"
+                                onClick={() => setConfirmDeleteRes(r._id)}
+                                title="Supprimer la réservation"
+                                aria-label="Supprimer la réservation"
+                              >
+                                <FiTrash2 size={13}/>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     )
@@ -2305,8 +2381,8 @@ export default function Admin() {
                       const { state, res } = dayStatus(v, calData.reservations, d.date)
                       const COLOR = {
                         ok:          { bg: 'transparent',            dot: '#4ade80', title: 'Disponible' },
-                        pending:     { bg: 'rgba(249,115,22,0.09)',  dot: '#f97316', title: `En attente — ${res?.user?.firstName ?? ''} ${res?.user?.lastName ?? ''}`.trim() || 'En attente' },
-                        booked:      { bg: 'rgba(248,113,113,0.09)', dot: '#f87171', title: `Loué — ${res?.user?.firstName ?? ''} ${res?.user?.lastName ?? ''}`.trim() || 'Loué' },
+                        pending:     { bg: 'rgba(249,115,22,0.09)',  dot: '#f97316', title: `En attente — ${clientContact(res).name}` },
+                        booked:      { bg: 'rgba(248,113,113,0.09)', dot: '#f87171', title: `Loué — ${clientContact(res).name}` },
                         maintenance: { bg: 'rgba(107,114,128,0.07)', dot: '#6b7280', title: v.status || 'Maintenance' },
                       }
                       const c = COLOR[state]
@@ -2379,7 +2455,7 @@ export default function Admin() {
                           </div>
                           <div className="res-item__info">
                             <div className="res-item__top">
-                              <span className="res-item__client">{r.user?.firstName} {r.user?.lastName}</span>
+                              <span className="res-item__client">{clientContact(r).name}</span>
                               <ResBadge status={r.status}/>
                             </div>
                             <span className="res-item__car">{r.vehicle?.name}</span>

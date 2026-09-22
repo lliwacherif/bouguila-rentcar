@@ -24,7 +24,7 @@ export class ReservationsService {
   ) {}
 
   // ── Create ───────────────────────────────────────────────────────────────
-  async create(dto: CreateReservationDto, userId: string) {
+  async create(dto: CreateReservationDto, userId?: string | null) {
     const vehicle = await this.vehiclesService.findOne(dto.vehicleId);
 
     if (vehicle.status !== VehicleStatus.DISPONIBLE || !vehicle.isActive) {
@@ -61,9 +61,21 @@ export class ReservationsService {
     const reqPct = dto.paymentOption === 'moitie' ? 50 : dto.paymentOption === 'total' ? 100 : 10;
     const reqAmt = parseFloat((totalTTC * (reqPct / 100)).toFixed(2));
 
+    const accountUserId = userId?.trim() || '';
+    const isGuest = !accountUserId;
+    const guest = isGuest ? this.requireGuestContact(dto) : null;
+
     const reservation = await this.reservationModel.create({
       vehicle:          new Types.ObjectId(dto.vehicleId),
-      user:             new Types.ObjectId(userId),
+      ...(accountUserId ? { user: new Types.ObjectId(accountUserId) } : {}),
+      isGuest,
+      ...(guest
+        ? {
+            guestName: guest.name,
+            guestPhone: guest.phone,
+            ...(guest.email ? { guestEmail: guest.email } : {}),
+          }
+        : {}),
       pickupLocation:   dto.pickupLocation,
       dropoffLocation:  dto.dropoffLocation,
       pickupDate:       pickup,
@@ -108,8 +120,36 @@ export class ReservationsService {
   async findOne(id: string, userId: string, userRole: string) {
     const r = await this.reservationModel.findById(id).populate('vehicle').populate('user', '-password').exec();
     if (!r) throw new NotFoundException('Reservation not found');
-    if (userRole !== 'admin' && r.user.toString() !== userId) throw new ForbiddenException('Access denied');
+    const ownerId = this.reservationOwnerId(r.user);
+    if (userRole !== 'admin' && (!ownerId || ownerId !== userId)) {
+      throw new ForbiddenException('Access denied');
+    }
     return r;
+  }
+
+  /** Visitor bookings must carry a name and phone. Email stays optional. */
+  private requireGuestContact(dto: CreateReservationDto) {
+    const name = dto.guestName?.trim().replace(/\s+/g, ' ') || '';
+    const phone = dto.guestPhone?.trim() || '';
+    const email = dto.guestEmail?.trim().toLowerCase() || '';
+
+    if (name.length < 2 || name.length > 80 || !/\p{L}/u.test(name) || /[<>]/.test(name)) {
+      throw new BadRequestException('Le nom est obligatoire.');
+    }
+
+    const digits = phone.replace(/[^\d]/g, '');
+    if (!/^\+?[\d\s().-]{8,30}$/.test(phone) || digits.length < 8 || digits.length > 15) {
+      throw new BadRequestException('Le numéro de téléphone est obligatoire.');
+    }
+
+    return { name, phone, email: email || undefined };
+  }
+
+  private reservationOwnerId(user: unknown): string | undefined {
+    if (!user) return undefined;
+    if (typeof user === 'string') return user;
+    const id = (user as { _id?: { toString(): string } })._id;
+    return id ? id.toString() : undefined;
   }
 
   // ── Update status ─────────────────────────────────────────────────────────
@@ -171,12 +211,14 @@ export class ReservationsService {
     if (existing.status === ReservationStatus.RECU && dto.status === ReservationStatus.PENDING) {
       const userObj = reservation.user as any;
       const vehicleObj = reservation.vehicle as any;
-      if (userObj?.email) {
+      const notifyEmail = userObj?.email || reservation.guestEmail;
+      const notifyName = userObj?.firstName || reservation.guestName || 'Client';
+      if (notifyEmail) {
         const pct = (update.requiredDepositPercentage as number) ?? reservation.requiredDepositPercentage ?? 30;
         const amt = (update.requiredDepositAmount as number) ?? reservation.requiredDepositAmount ?? (reservation.totalTTC * 0.3);
         await this.mailService.sendReservationApproval(
-          userObj.email,
-          userObj.firstName || 'Client',
+          notifyEmail,
+          notifyName,
           reservation._id.toString(),
           vehicleObj?.name || 'Véhicule',
           pct,

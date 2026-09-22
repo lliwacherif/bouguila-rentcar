@@ -49,7 +49,10 @@ export default function VehicleDetail() {
     driverAge: effectiveAge,
   })
   const [submitting, setSubmitting] = useState(false)
-  const [bookingSuccess] = useState(false)
+  const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [guestReceipt, setGuestReceipt] = useState(null)
+  const [reserveChoice, setReserveChoice] = useState(false)
+  const [guestForm, setGuestForm] = useState({ name: '', phone: '', email: '' })
   const [bookingError, setBookingError] = useState(null)
   const [acceptAlternative, setAcceptAlternative] = useState(true)
   // Track hold id so we can release it if the user cancels, and pass it to
@@ -64,15 +67,27 @@ export default function VehicleDetail() {
   }, [])
 
   // Must be defined before early returns so hook order is stable
-  const submitReservation = async (data) => {
+  const submitReservation = async (data, { asGuest = false } = {}) => {
     setSubmitting(true)
     setBookingError(null)
     try {
-      await reservationsService.create(data)
+      const created = await reservationsService.create(data)
       holdIdRef.current = null
-      navigate('/historique')
+      if (asGuest) {
+        const id = created?._id ? String(created._id) : ''
+        setGuestReceipt({
+          code: id ? `#TCR-${id.slice(-6).toUpperCase()}` : '',
+          name: data.guestName,
+          phone: data.guestPhone,
+          email: data.guestEmail || '',
+        })
+        setBookingSuccess(true)
+      } else {
+        navigate('/historique')
+      }
     } catch (err) {
-      setBookingError(err?.response?.data?.message || 'Erreur lors de la réservation.')
+      const msg = err?.response?.data?.message
+      setBookingError(Array.isArray(msg) ? msg.join(' ') : (msg || 'Erreur lors de la réservation.'))
     } finally {
       setSubmitting(false)
     }
@@ -180,19 +195,10 @@ export default function VehicleDetail() {
       }
     }
 
-    // Step 2 — if not logged in, open auth modal with booking context preserved
+    // Step 2 — visitor chooses an account or a guest booking
     if (!user) {
-      openAuthModal('login', {
-        vehicleId: car._id,
-        pickupDate: booking.pickupDate,
-        dropoffDate: booking.dropoffDate,
-        pickupLocation: booking.pickupLocation,
-        dropoffLocation: booking.dropoffLocation,
-        driverAge: booking.driverAge,
-        paymentOption: paymentOptions[paymentOption].key,
-        holdId,
-        acceptAlternative,
-      })
+      setReserveChoice(true)
+      document.getElementById('vd-booking')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       return
     }
 
@@ -208,6 +214,56 @@ export default function VehicleDetail() {
       holdId,
       acceptAlternative,
     })
+  }
+
+  const bookingPayload = () => ({
+    vehicleId: car._id,
+    pickupDate: booking.pickupDate,
+    dropoffDate: booking.dropoffDate,
+    pickupLocation: booking.pickupLocation,
+    dropoffLocation: booking.dropoffLocation,
+    driverAge: Number(booking.driverAge) || 30,
+    paymentOption: paymentOptions[paymentOption].key,
+    holdId: holdIdRef.current,
+    acceptAlternative,
+  })
+
+  const handleAccountReserve = () => {
+    openAuthModal('login', bookingPayload())
+  }
+
+  const handleGuestReserve = async (e) => {
+    e.preventDefault()
+    const name = guestForm.name.trim().replace(/\s+/g, ' ')
+    const phone = guestForm.phone.trim()
+    const email = guestForm.email.trim()
+    const digits = phone.replace(/\D/g, '')
+
+    if (name.length < 2) {
+      setBookingError('Le nom est obligatoire.')
+      return
+    }
+    if (digits.length < 8 || digits.length > 15) {
+      setBookingError('Le numéro de téléphone est obligatoire.')
+      return
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setBookingError('Adresse e-mail invalide.')
+      return
+    }
+    const age = Number(booking.driverAge)
+    if (!age || age < 18) {
+      setBookingError('L\'âge du conducteur doit être d\'au moins 18 ans.')
+      return
+    }
+
+    await submitReservation({
+      ...bookingPayload(),
+      driverAge: age,
+      guestName: name,
+      guestPhone: phone,
+      ...(email ? { guestEmail: email } : {}),
+    }, { asGuest: true })
   }
 
   return (
@@ -376,9 +432,21 @@ export default function VehicleDetail() {
           {bookingSuccess ? (
             <div className="vd-panel" style={{ textAlign: 'center', padding: 32 }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-              <h3 style={{ color: '#16a34a', marginBottom: 8 }}>Réservation confirmée!</h3>
-              <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>Votre réservation a été créée avec succès. Vous recevrez une confirmation par email.</p>
-              <button onClick={() => navigate('/')} style={{ background: '#1e3a8a', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', cursor: 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit' }}>Retour à l'accueil</button>
+              <h3 style={{ color: '#16a34a', marginBottom: 8 }}>Demande enregistrée</h3>
+              <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 16, lineHeight: 1.6 }}>
+                {guestReceipt
+                  ? 'Votre réservation visiteur est enregistrée. L\'agence vous contactera pour la confirmer.'
+                  : 'Votre réservation a été créée avec succès.'}
+              </p>
+              {guestReceipt && (
+                <div className="vd-guest-receipt">
+                  {guestReceipt.code && <p><strong>{guestReceipt.code}</strong></p>}
+                  <p>{guestReceipt.name}</p>
+                  <p>{guestReceipt.phone}</p>
+                  {guestReceipt.email && <p>{guestReceipt.email}</p>}
+                </div>
+              )}
+              <button onClick={() => navigate('/')} style={{ background: 'var(--gold)', color: 'var(--gold-ink)', border: 'none', borderRadius: 8, padding: '12px 24px', cursor: 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit' }}>Retour à l'accueil</button>
             </div>
           ) : (
             <div className="vd-panel">
@@ -463,8 +531,61 @@ export default function VehicleDetail() {
               )}
 
               <button className="vd-panel__cta" onClick={handleReserve} disabled={submitting}>
-                {submitting ? 'Réservation...' : 'Click to Pay'}
+                {submitting ? 'Réservation...' : 'Réserver'}
               </button>
+
+              {!user && reserveChoice && (
+                <div className="vd-guest">
+                  <p className="vd-guest__title">Comment souhaitez-vous réserver ?</p>
+                  <button type="button" className="vd-guest__account" onClick={handleAccountReserve} disabled={submitting}>
+                    Se connecter ou créer un compte
+                  </button>
+                  <form className="vd-guest__form" onSubmit={handleGuestReserve}>
+                    <p className="vd-guest__or">ou en tant que visiteur</p>
+                    <label className="vd-guest__label">
+                      Nom complet *
+                      <input
+                        className="vd-guest__input"
+                        type="text"
+                        required
+                        autoComplete="name"
+                        maxLength={80}
+                        value={guestForm.name}
+                        onChange={e => setGuestForm(f => ({ ...f, name: e.target.value }))}
+                        placeholder="Votre nom"
+                      />
+                    </label>
+                    <label className="vd-guest__label">
+                      Téléphone *
+                      <input
+                        className="vd-guest__input"
+                        type="tel"
+                        required
+                        autoComplete="tel"
+                        maxLength={30}
+                        value={guestForm.phone}
+                        onChange={e => setGuestForm(f => ({ ...f, phone: e.target.value }))}
+                        placeholder="+216 93 996 200"
+                      />
+                    </label>
+                    <label className="vd-guest__label">
+                      E-mail <span>(optionnel)</span>
+                      <input
+                        className="vd-guest__input"
+                        type="email"
+                        autoComplete="email"
+                        maxLength={120}
+                        value={guestForm.email}
+                        onChange={e => setGuestForm(f => ({ ...f, email: e.target.value }))}
+                        placeholder="vous@exemple.com"
+                      />
+                    </label>
+                    <button type="submit" className="vd-guest__submit" disabled={submitting}>
+                      {submitting ? 'Enregistrement...' : 'Confirmer en visiteur'}
+                    </button>
+                  </form>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -504,22 +625,9 @@ export default function VehicleDetail() {
                 <div className="vd-logo vd-logo--apple">🍎 Pay</div>
               </div>
 
-              {!user && (
-                <p style={{ fontSize:11.5, color:'#9ca3af', textAlign:'center', marginTop:8 }}>
-                  <button
-                    style={{ background:'none', border:'none', color:'#1e3a8a', cursor:'pointer', fontSize:'inherit', textDecoration:'underline', fontFamily:'inherit' }}
-                    onClick={() => openAuthModal('login')}
-                  >
-                    Connectez-vous
-                  </button>
-                  {' '}ou{' '}
-                  <button
-                    style={{ background:'none', border:'none', color:'#1e3a8a', cursor:'pointer', fontSize:'inherit', textDecoration:'underline', fontFamily:'inherit' }}
-                    onClick={() => openAuthModal('register')}
-                  >
-                    créez un compte
-                  </button>
-                  {' '}pour réserver.
+              {!user && !reserveChoice && (
+                <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', marginTop: 8, lineHeight: 1.5 }}>
+                  Vous pourrez réserver avec un compte ou en tant que visiteur.
                 </p>
               )}
             </div>

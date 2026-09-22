@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsArray, IsBoolean, IsDateString, IsEnum, IsMongoId,
-  IsNotEmpty, IsNumber, IsOptional, IsString, Min,
+  IsArray, IsBoolean, IsDateString, IsEmail, IsEnum, IsMongoId,
+  IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf,
 } from 'class-validator';
 import { PaymentOption } from '../schemas/reservation.schema';
 
@@ -57,4 +57,34 @@ export class CreateReservationDto {
   @ApiPropertyOptional({ example: '6686b3a2c1234abc00000099', description: 'Hold ID to release after booking is created' })
   @IsOptional() @IsMongoId()
   holdId?: string;
+
+  @ApiPropertyOptional({
+    example: 'Amina Ben Ali',
+    description: 'Required for a visitor booking (no account). Ignored when the request is authenticated.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  guestName?: string;
+
+  @ApiPropertyOptional({
+    example: '+216 93 996 200',
+    description: 'Required for a visitor booking (no account). Ignored when the request is authenticated.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(30)
+  guestPhone?: string;
+
+  @ApiPropertyOptional({
+    example: 'amina@example.com',
+    description: 'Optional contact email for a visitor booking.',
+  })
+  @ValidateIf((o) => typeof o.guestEmail === 'string' && o.guestEmail.trim() !== '')
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(120)
+  guestEmail?: string;
 }
