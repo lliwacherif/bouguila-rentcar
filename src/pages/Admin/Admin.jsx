@@ -251,6 +251,7 @@ const EMPTY = {
   fuel: 'Essence', seats: 5, doors: 5, bags: 2,
   engineSize: '', fuelTankCapacity: '', mileage: '',
   pricePerDay: '', pricePerWeek: '', pricePerMonth: '',
+  seasonalRates: [],
   depositAmount: 500, minDriverAge: 21,
   status: 'Disponible', isActive: true,
   features: { ac: false, bluetooth: false, radio: false, usb: false, gps: false, cruiseControl: false, parkingSensors: false, camera360: false, sunroof: false, heatedSeats: false },
@@ -264,6 +265,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
     ? {
         ...EMPTY, ...vehicle,
         features: { ...EMPTY.features, ...(vehicle.features || {}) },
+        seasonalRates: (vehicle.seasonalRates || []).map(rate => ({ ...rate, enabled: rate.enabled !== false })),
         tags: (vehicle.tags || []).join(', '),
         model3dUrl: vehicle.model3dUrl || '',
         lastMaintenanceDate:  vehicle.lastMaintenanceDate  ? vehicle.lastMaintenanceDate.slice(0, 10) : '',
@@ -286,6 +288,35 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
     setError('')
   }
   const setFeat = (f) => setForm(p => ({ ...p, features: { ...p.features, [f]: !p.features[f] } }))
+  const addSeasonalRate = () => setForm(p => ({
+    ...p,
+    seasonalRates: [...p.seasonalRates, {
+      name: `Saison ${p.seasonalRates.length + 1}`,
+      startMonth: 1,
+      startDay: 1,
+      endMonth: 3,
+      endDay: 31,
+      pricePerDay: p.pricePerDay || '',
+      enabled: true,
+    }],
+  }))
+  const updateSeasonalRate = (index, field, value) => setForm(p => ({
+    ...p,
+    seasonalRates: p.seasonalRates.map((rate, i) => i === index ? { ...rate, [field]: value } : rate),
+  }))
+  const removeSeasonalRate = index => setForm(p => ({
+    ...p,
+    seasonalRates: p.seasonalRates.filter((_, i) => i !== index),
+  }))
+  const loadQuarterPreset = () => setForm(p => ({
+    ...p,
+    seasonalRates: [
+      { name: '1er trimestre', startMonth: 1, startDay: 1, endMonth: 3, endDay: 31, pricePerDay: p.pricePerDay || '', enabled: true },
+      { name: '2e trimestre', startMonth: 4, startDay: 1, endMonth: 6, endDay: 30, pricePerDay: p.pricePerDay || '', enabled: true },
+      { name: '3e trimestre', startMonth: 7, startDay: 1, endMonth: 9, endDay: 30, pricePerDay: p.pricePerDay || '', enabled: true },
+      { name: '4e trimestre', startMonth: 10, startDay: 1, endMonth: 12, endDay: 31, pricePerDay: p.pricePerDay || '', enabled: true },
+    ],
+  }))
 
   const handleImage = async (e) => {
     const file = e.target.files[0]; if (!file) return
@@ -361,6 +392,10 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
     if (form.seats && (Number(form.seats) < 1 || Number(form.seats) > 9)) errors.push('❌ Places — doit être entre 1 et 9')
     if (form.minDriverAge && (Number(form.minDriverAge) < 18 || Number(form.minDriverAge) > 30)) errors.push('❌ Âge min conducteur — doit être entre 18 et 30')
     if (form.pricePerDay && Number(form.pricePerDay) <= 0) errors.push('❌ Tarif / jour — doit être supérieur à 0')
+    form.seasonalRates.forEach((rate, index) => {
+      if (!rate.name?.trim()) errors.push(`❌ Période ${index + 1} — nom requis`)
+      if (!rate.pricePerDay || Number(rate.pricePerDay) <= 0) errors.push(`❌ Période ${index + 1} — tarif TTC requis`)
+    })
 
     return errors
   }
@@ -387,6 +422,15 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
         pricePerDay:       parseFloat(form.pricePerDay),
         pricePerWeek:      form.pricePerWeek  ? parseFloat(form.pricePerWeek)  : undefined,
         pricePerMonth:     form.pricePerMonth ? parseFloat(form.pricePerMonth) : undefined,
+        seasonalRates:     form.seasonalRates.map(rate => ({
+          name: String(rate.name).trim(),
+          startMonth: Number(rate.startMonth),
+          startDay: Number(rate.startDay),
+          endMonth: Number(rate.endMonth),
+          endDay: Number(rate.endDay),
+          pricePerDay: Number(rate.pricePerDay),
+          enabled: rate.enabled !== false,
+        })),
         depositAmount:     form.depositAmount !== '' ? Number(form.depositAmount) : 500,
         minDriverAge:      form.minDriverAge !== '' ? Number(form.minDriverAge) : 21,
         fuelTankCapacity:  form.fuelTankCapacity ? Number(form.fuelTankCapacity) : undefined,
@@ -400,7 +444,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
       // Strip MongoDB metadata and the populated parc object.
       // The API accepts parcId, not parc, and rejects unknown fields.
       // eslint-disable-next-line no-unused-vars
-      const { _id, id, __v, createdAt, updatedAt, status, isActive, parc, ...cleanPayload } = payload
+      const { _id, id, __v, createdAt, updatedAt, status, isActive, parc, pricing, ...cleanPayload } = payload
 
       if (vehicle) await vehiclesService.update(vehicle._id, cleanPayload)
       else         await vehiclesService.create(cleanPayload)
@@ -620,11 +664,44 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
           {/* ── TARIFS ── */}
           {tab === 'pricing' && (
             <>
-              <div className="vm-info-box">💡 Tous les tarifs sont en TND (Hors Taxe - HT). La TVA (19%) sera calculée et ajoutée automatiquement.</div>
+              <div className="vm-info-box">💡 Tous les tarifs sont en TND, TVA comprise (TTC). Le site convertit ensuite le montant dans la devise choisie par le visiteur.</div>
               <div className="vm-row">
-                <div className="vm-field"><label>Tarif HT / jour (TND) *</label><input type="number" value={form.pricePerDay} onChange={set('pricePerDay')} min={1} step={0.5} placeholder="26" required /></div>
+                <div className="vm-field"><label>Tarif standard TTC / jour (TND) *</label><input type="number" value={form.pricePerDay} onChange={set('pricePerDay')} min={1} step={0.5} placeholder="120" required /></div>
                 <div className="vm-field"><label>Tarif / semaine</label><input type="number" value={form.pricePerWeek} onChange={set('pricePerWeek')} min={0} step={1} placeholder="160" /></div>
                 <div className="vm-field"><label>Tarif / mois</label><input type="number" value={form.pricePerMonth} onChange={set('pricePerMonth')} min={0} step={1} placeholder="580" /></div>
+              </div>
+              <div className="vm-seasonal">
+                <div className="vm-seasonal__header">
+                  <div>
+                    <h4>Tarifs saisonniers</h4>
+                    <p>Chaque période se répète tous les ans. Les jours non couverts utilisent le tarif standard.</p>
+                  </div>
+                  <div className="vm-seasonal__actions">
+                    <button type="button" className="admin-btn admin-btn--outline" onClick={loadQuarterPreset}>Créer 4 trimestres</button>
+                    <button type="button" className="admin-btn admin-btn--primary" onClick={addSeasonalRate}>+ Ajouter une période</button>
+                  </div>
+                </div>
+                {form.seasonalRates.length === 0 ? (
+                  <div className="vm-seasonal__empty">Aucune période configurée — le tarif standard s'applique toute l'année.</div>
+                ) : form.seasonalRates.map((rate, index) => (
+                  <div className="vm-seasonal__row" key={index}>
+                    <div className="vm-field vm-field--grow2"><label>Nom</label><input value={rate.name} onChange={e => updateSeasonalRate(index, 'name', e.target.value)} placeholder="Haute saison" /></div>
+                    <div className="vm-seasonal__date">
+                      <span>Du</span>
+                      <input aria-label="Jour de début" type="number" min="1" max="31" value={rate.startDay} onChange={e => updateSeasonalRate(index, 'startDay', e.target.value)} />
+                      <input aria-label="Mois de début" type="number" min="1" max="12" value={rate.startMonth} onChange={e => updateSeasonalRate(index, 'startMonth', e.target.value)} />
+                    </div>
+                    <div className="vm-seasonal__date">
+                      <span>Au</span>
+                      <input aria-label="Jour de fin" type="number" min="1" max="31" value={rate.endDay} onChange={e => updateSeasonalRate(index, 'endDay', e.target.value)} />
+                      <input aria-label="Mois de fin" type="number" min="1" max="12" value={rate.endMonth} onChange={e => updateSeasonalRate(index, 'endMonth', e.target.value)} />
+                    </div>
+                    <div className="vm-field"><label>TTC / jour (TND)</label><input type="number" min="1" step="0.5" value={rate.pricePerDay} onChange={e => updateSeasonalRate(index, 'pricePerDay', e.target.value)} /></div>
+                    <label className="vm-seasonal__enabled"><input type="checkbox" checked={rate.enabled !== false} onChange={e => updateSeasonalRate(index, 'enabled', e.target.checked)} /> Active</label>
+                    <button type="button" className="vm-seasonal__remove" onClick={() => removeSeasonalRate(index)} aria-label={`Supprimer ${rate.name}`}>×</button>
+                  </div>
+                ))}
+                {form.seasonalRates.length > 0 && <small className="vm-seasonal__hint">Dates au format jour / mois. Les périodes ne doivent pas se chevaucher.</small>}
               </div>
               <div className="vm-row">
                 <div className="vm-field"><label>Caution / dépôt (TND)</label><input type="number" value={form.depositAmount} onChange={set('depositAmount')} min={0} /></div>
@@ -672,6 +749,12 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
                 📋 L'historique des réservations est consultable via le bouton <strong>Historique</strong> dans la liste des véhicules.
               </div>
             </>
+          )}
+
+          {tab !== 'general' && error && (
+            <div style={{ background: '#ff000033', border: '1px solid #ff4444', borderRadius: 8, padding: '10px 14px', color: '#ff7777', fontSize: 13, whiteSpace: 'pre-wrap', marginTop: 12 }}>
+              {error}
+            </div>
           )}
 
           <div className="vm-actions">

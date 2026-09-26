@@ -19,6 +19,29 @@ class CreateVehicleFeaturesDto {
   @IsOptional() @IsBoolean() heatedSeats?: boolean;
 }
 
+class SeasonalRateDto {
+  @ApiProperty({ example: 'Haute saison' })
+  @IsString() @IsNotEmpty() name: string;
+
+  @ApiProperty({ example: 7 })
+  @IsNumber() @Min(1) @Max(12) startMonth: number;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber() @Min(1) @Max(31) startDay: number;
+
+  @ApiProperty({ example: 8 })
+  @IsNumber() @Min(1) @Max(12) endMonth: number;
+
+  @ApiProperty({ example: 31 })
+  @IsNumber() @Min(1) @Max(31) endDay: number;
+
+  @ApiProperty({ example: 180, description: 'Daily TTC price in TND' })
+  @IsNumber() @Min(1) pricePerDay: number;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional() @IsBoolean() enabled?: boolean;
+}
+
 export class CreateVehicleDto {
   // ── Identity ───────────────────────────────────────────────────────────
   @ApiProperty({ example: 'Renault Clio 5' })
@@ -70,6 +93,10 @@ export class CreateVehicleDto {
   // ── Pricing ────────────────────────────────────────────────────────────
   @ApiProperty({ example: 26 })
   @IsNumber() @Min(1) pricePerDay: number;
+
+  @ApiPropertyOptional({ type: () => [SeasonalRateDto] })
+  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => SeasonalRateDto)
+  seasonalRates?: SeasonalRateDto[];
 
   @ApiPropertyOptional({ example: 160 })
   @IsOptional() @IsNumber() @Min(0) pricePerWeek?: number;

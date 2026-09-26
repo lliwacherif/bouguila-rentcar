@@ -38,6 +38,9 @@ function CarCard({ car, searchParams }) {
   const { t, isRtl } = useLanguage()
   const { formatPrice } = useCurrency()
   const color = CATEGORY_COLORS[car.category] || '#1e3a8a'
+  const pricing = car.pricing
+  const dailyRate = pricing?.averageDailyRate ?? car.pricePerDay
+  const hasRateRange = pricing && pricing.minimumDailyRate !== pricing.maximumDailyRate
   const goToDetail = () => navigate(`/voitures/${car._id}?${searchParams}`)
 
   return (
@@ -112,8 +115,20 @@ function CarCard({ car, searchParams }) {
         </button>
 
         <div className="sr-card__pricing">
-          <span className="sr-card__price-label">{t('searchResults.dailyPrice', 'Prix par jour')}</span>
-          <span className="sr-card__price">{formatPrice(car.pricePerDay, isRtl)}</span>
+          <span className="sr-card__price-label">
+            {hasRateRange ? 'Moyenne TTC / jour' : t('searchResults.dailyPrice', 'Prix TTC par jour')}
+          </span>
+          <span className="sr-card__price">{formatPrice(dailyRate, isRtl)}</span>
+          {hasRateRange && (
+            <span className="sr-card__price-label">
+              {formatPrice(pricing.minimumDailyRate, isRtl)} – {formatPrice(pricing.maximumDailyRate, isRtl)}
+            </span>
+          )}
+          {pricing?.totalDays > 1 && (
+            <span className="sr-card__price-label">
+              Total {pricing.totalDays} jours: {formatPrice(pricing.totalTTC, isRtl)}
+            </span>
+          )}
         </div>
 
         <div className="sr-card__actions">

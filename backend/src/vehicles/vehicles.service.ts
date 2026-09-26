@@ -1,14 +1,16 @@
 import {
   Injectable,
+  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Vehicle, VehicleDocument, VehicleStatus } from './schemas/vehicle.schema';
+import { SeasonalRate, Vehicle, VehicleDocument, VehicleStatus } from './schemas/vehicle.schema';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { QueryVehicleDto } from './dto/query-vehicle.dto';
 import { Reservation, ReservationDocument, ReservationStatus } from '../reservations/schemas/reservation.schema';
+import { VehiclePricingService } from './vehicle-pricing.service';
 
 @Injectable()
 export class VehiclesService {
@@ -17,9 +19,11 @@ export class VehiclesService {
     private readonly vehicleModel: Model<VehicleDocument>,
     @InjectModel(Reservation.name)
     private readonly reservationModel: Model<ReservationDocument>,
+    private readonly pricingService: VehiclePricingService,
   ) {}
 
   async create(dto: CreateVehicleDto) {
+    this.pricingService.validatePeriods(dto.seasonalRates as SeasonalRate[] | undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { parcId, parc: _populatedParc, ...rest } = dto as any;
     return this.vehicleModel.create({
@@ -44,11 +48,6 @@ export class VehiclesService {
     if (fuel) filter.fuel = fuel;
     if (status) filter.status = status;
     if (seats) filter.seats = { $gte: seats };
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      filter.pricePerDay = {};
-      if (minPrice !== undefined) filter.pricePerDay.$gte = minPrice;
-      if (maxPrice !== undefined) filter.pricePerDay.$lte = maxPrice;
-    }
     if (ac !== undefined) filter['features.ac'] = ac;
     if (gps !== undefined) filter['features.gps'] = gps;
 
@@ -88,13 +87,34 @@ export class VehiclesService {
     }
     // ────────────────────────────────────────────────────────────────────────
 
-    const skip = (page - 1) * limit;
-    const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+    if (Boolean(pickupDate) !== Boolean(dropoffDate)) {
+      throw new BadRequestException('pickupDate and dropoffDate must be provided together');
+    }
 
-    const [vehicles, total] = await Promise.all([
-      this.vehicleModel.find(filter).sort(sort).skip(skip).limit(limit).exec(),
-      this.vehicleModel.countDocuments(filter),
-    ]);
+    // Seasonal rates are computed values, so price filtering/sorting must happen
+    // after each eligible vehicle has been quoted for the requested stay.
+    const documents = await this.vehicleModel.find(filter).exec();
+    let vehicles = documents.map(document => {
+      const pricing = pickupDate && dropoffDate
+        ? this.pricingService.quote(document, pickupDate, dropoffDate)
+        : this.pricingService.quoteToday(document);
+      return { ...document.toObject(), pricing };
+    });
+
+    if (minPrice !== undefined) vehicles = vehicles.filter(v => v.pricing.averageDailyRate >= minPrice);
+    if (maxPrice !== undefined) vehicles = vehicles.filter(v => v.pricing.averageDailyRate <= maxPrice);
+
+    const direction = sortOrder === 'asc' ? 1 : -1;
+    vehicles.sort((a, b) => {
+      const left = sortBy === 'pricePerDay' ? a.pricing.averageDailyRate : (a as any)[sortBy];
+      const right = sortBy === 'pricePerDay' ? b.pricing.averageDailyRate : (b as any)[sortBy];
+      if (typeof left === 'string' && typeof right === 'string') return left.localeCompare(right) * direction;
+      return ((Number(left) || 0) - (Number(right) || 0)) * direction;
+    });
+
+    const total = vehicles.length;
+    const skip = (page - 1) * limit;
+    vehicles = vehicles.slice(skip, skip + limit);
 
     return {
       vehicles,
@@ -108,7 +128,17 @@ export class VehiclesService {
     return vehicle;
   }
 
+  async getQuote(id: string, pickupDate: string, dropoffDate: string) {
+    const vehicle = await this.findOne(id);
+    return this.pricingService.quote(vehicle, pickupDate, dropoffDate);
+  }
+
+  quoteVehicle(vehicle: Pick<Vehicle, 'pricePerDay' | 'seasonalRates'>, pickupDate: string | Date, dropoffDate: string | Date) {
+    return this.pricingService.quote(vehicle, pickupDate, dropoffDate);
+  }
+
   async update(id: string, dto: UpdateVehicleDto) {
+    this.pricingService.validatePeriods(dto.seasonalRates as SeasonalRate[] | undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { parcId, parc: _populatedParc, ...rest } = dto as any;
     const update: Record<string, any> = { ...rest };

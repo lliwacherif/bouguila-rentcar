@@ -15,6 +15,8 @@ import ParcSelect from '../../components/ParcSelect/ParcSelect'
 import './VehicleDetail.css'
 
 const TVA_RATE = 0.19
+const today = new Date().toISOString().split('T')[0]
+const defaultDropoff = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
 
 export default function VehicleDetail() {
   const { id } = useParams()
@@ -26,8 +28,8 @@ export default function VehicleDetail() {
 
   // Pre-fill from URL query string (passed from SearchResults / BookingForm)
   const urlLocation   = searchParams.get('location')    || 'Aéroport de Tunis-Carthage'
-  const urlPickup     = searchParams.get('pickupDate')  || ''
-  const urlDropoff    = searchParams.get('dropoffDate') || ''
+  const urlPickup     = searchParams.get('pickupDate')  || today
+  const urlDropoff    = searchParams.get('dropoffDate') || defaultDropoff
   const urlAge        = searchParams.get('driverAge')   || '30'
 
   // Effective age: account age wins over everything when logged in
@@ -55,6 +57,9 @@ export default function VehicleDetail() {
   const [reserveChoice, setReserveChoice] = useState(false)
   const [guestForm, setGuestForm] = useState({ name: '', phone: '', email: '' })
   const [bookingError, setBookingError] = useState(null)
+  const [pricingQuote, setPricingQuote] = useState(null)
+  const [quoteLoading, setQuoteLoading] = useState(false)
+  const [quoteError, setQuoteError] = useState('')
   const [acceptAlternative, setAcceptAlternative] = useState(true)
   // Track hold id so we can release it if the user cancels, and pass it to
   // reservationsService.create so it gets released server-side after booking
@@ -133,6 +138,27 @@ export default function VehicleDetail() {
     fetch()
   }, [id])
 
+  // Refresh the authoritative server quote whenever the visitor changes dates.
+  useEffect(() => {
+    if (!car?._id || !booking.pickupDate || !booking.dropoffDate || booking.dropoffDate <= booking.pickupDate) {
+      setPricingQuote(null)
+      return undefined
+    }
+    let active = true
+    setQuoteLoading(true)
+    setQuoteError('')
+    vehiclesService.getQuote(car._id, booking.pickupDate, booking.dropoffDate)
+      .then(data => { if (active) setPricingQuote(data) })
+      .catch(err => {
+        if (active) {
+          setPricingQuote(null)
+          setQuoteError(err?.response?.data?.message || 'Impossible de calculer le tarif pour ces dates.')
+        }
+      })
+      .finally(() => { if (active) setQuoteLoading(false) })
+    return () => { active = false }
+  }, [car?._id, booking.pickupDate, booking.dropoffDate])
+
   if (loading) return (
     <div className="vd-page">
       <div className="container" style={{ padding: '60px 24px', textAlign: 'center', color: '#6b7280' }}>
@@ -159,9 +185,13 @@ export default function VehicleDetail() {
   }
 
   const totalDays = calcDays()
-  const subtotalHT = car.pricePerDay * totalDays
-  const tva = parseFloat((subtotalHT * TVA_RATE).toFixed(2))
-  const totalTTC = parseFloat((subtotalHT + tva).toFixed(2))
+  const fallbackTotalTTC = car.pricePerDay * totalDays
+  const fallbackSubtotalHT = parseFloat((fallbackTotalTTC / (1 + TVA_RATE)).toFixed(2))
+  const totalTTC = pricingQuote?.totalTTC ?? fallbackTotalTTC
+  const subtotalHT = pricingQuote?.subtotalHT ?? fallbackSubtotalHT
+  const tva = pricingQuote?.tva ?? parseFloat((fallbackTotalTTC - fallbackSubtotalHT).toFixed(2))
+  const displayedDailyRate = pricingQuote?.averageDailyRate ?? car.pricePerDay
+  const hasRateRange = pricingQuote && pricingQuote.minimumDailyRate !== pricingQuote.maximumDailyRate
 
   const paymentOptions = [
     { label: 'Acompte', pct: '10%', amount: (totalTTC * 0.1).toFixed(2), key: 'acompte' },
@@ -175,6 +205,11 @@ export default function VehicleDetail() {
   const handleReserve = async () => {
     if (!booking.pickupDate || !booking.dropoffDate) {
       setBookingError('Veuillez sélectionner vos dates.')
+      return
+    }
+
+    if (quoteLoading || quoteError) {
+      setBookingError(quoteError || 'Le tarif est en cours de calcul. Veuillez patienter.')
       return
     }
 
@@ -456,9 +491,12 @@ export default function VehicleDetail() {
               <div className="vd-panel__car-cat">⚙️ {car.category}</div>
               <div className="vd-panel__divider" />
 
-              <div className="vd-panel__row"><span>Prix par jour</span><div className="vd-panel__row-right"><span className="vd-panel__row-val">{formatPrice(car.pricePerDay)}</span><span className="vd-panel__row-note">(HT)</span></div></div>
+              <div className="vd-panel__row"><span>{hasRateRange ? 'Prix moyen par jour' : 'Prix par jour'}</span><div className="vd-panel__row-right"><span className="vd-panel__row-val">{formatPrice(displayedDailyRate)}</span><span className="vd-panel__row-note">(TTC)</span></div></div>
               <div className="vd-panel__row"><span>Durée</span><span className="vd-panel__row-val">{totalDays} jours</span></div>
               <div className="vd-panel__row vd-panel__row--bold"><span>Sous-total HT</span><span>{formatPrice(subtotalHT)}</span></div>
+
+              {quoteLoading && <div className="vd-panel__row"><span>Actualisation du tarif…</span></div>}
+              {quoteError && <div className="vd-panel__row" style={{ color: '#f87171' }}><span>{quoteError}</span></div>}
 
               <button className="vd-panel__detail-toggle" onClick={() => setShowDetail(!showDetail)}>
                 <span>Détail du montant</span>
@@ -466,6 +504,12 @@ export default function VehicleDetail() {
               </button>
               {showDetail && (
                 <div className="vd-panel__detail">
+                  {pricingQuote?.breakdown?.map((line, index) => (
+                    <div className="vd-panel__detail-row" key={`${line.startDate}-${index}`}>
+                      <span>{line.name} · {line.days} j × {formatPrice(line.pricePerDay)}</span>
+                      <span>{formatPrice(line.totalTTC)}</span>
+                    </div>
+                  ))}
                   <div className="vd-panel__detail-row"><span>Sous-total HT</span><span>{formatPrice(subtotalHT)}</span></div>
                   <div className="vd-panel__detail-row"><span>TVA (19%)</span><span>{formatPrice(tva)}</span></div>
                 </div>

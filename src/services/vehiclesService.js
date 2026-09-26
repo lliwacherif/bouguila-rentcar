@@ -16,6 +16,11 @@ export const vehiclesService = {
     return res.data.data
   },
 
+  async getQuote(id, pickupDate, dropoffDate) {
+    const res = await api.get(`/vehicles/${id}/quote`, { params: { pickupDate, dropoffDate } })
+    return res.data.data
+  },
+
   async create(data) {
     const res = await api.post('/vehicles', data)
     return res.data.data

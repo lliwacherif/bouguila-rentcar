@@ -46,6 +46,32 @@ class VehicleFeatures {
 }
 const VehicleFeaturesSchema = SchemaFactory.createForClass(VehicleFeatures);
 
+@Schema({ _id: false })
+export class SeasonalRate {
+  @Prop({ required: true, trim: true })
+  name: string;
+
+  @Prop({ required: true, min: 1, max: 12 })
+  startMonth: number;
+
+  @Prop({ required: true, min: 1, max: 31 })
+  startDay: number;
+
+  @Prop({ required: true, min: 1, max: 12 })
+  endMonth: number;
+
+  @Prop({ required: true, min: 1, max: 31 })
+  endDay: number;
+
+  /** Consumer-facing daily price, TVA included, stored in the app base currency (TND). */
+  @Prop({ required: true, min: 0 })
+  pricePerDay: number;
+
+  @Prop({ default: true })
+  enabled: boolean;
+}
+const SeasonalRateSchema = SchemaFactory.createForClass(SeasonalRate);
+
 @Schema({ timestamps: true })
 export class Vehicle {
   // ── Identity ─────────────────────────────────────────────────────────────
@@ -98,6 +124,10 @@ export class Vehicle {
   // ── Pricing ───────────────────────────────────────────────────────────────
   @Prop({ required: true, min: 0 })
   pricePerDay: number;
+
+  /** Recurring annual rates. Gaps fall back to pricePerDay. */
+  @Prop({ type: [SeasonalRateSchema], default: [] })
+  seasonalRates: SeasonalRate[];
 
   @Prop({ min: 0 })
   pricePerWeek?: number;

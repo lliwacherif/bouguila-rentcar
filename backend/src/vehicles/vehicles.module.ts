@@ -5,6 +5,7 @@ import { VehiclesController } from './vehicles.controller';
 import { Vehicle, VehicleSchema } from './schemas/vehicle.schema';
 import { Reservation, ReservationSchema } from '../reservations/schemas/reservation.schema';
 import { VehicleStatusSyncService } from './vehicle-status-sync.service';
+import { VehiclePricingService } from './vehicle-pricing.service';
 
 @Module({
   imports: [
@@ -13,9 +14,9 @@ import { VehicleStatusSyncService } from './vehicle-status-sync.service';
       { name: Reservation.name, schema: ReservationSchema },
     ]),
   ],
-  providers: [VehiclesService, VehicleStatusSyncService],
+  providers: [VehiclesService, VehicleStatusSyncService, VehiclePricingService],
   controllers: [VehiclesController],
-  exports: [VehiclesService],
+  exports: [VehiclesService, VehiclePricingService],
 })
 export class VehiclesModule {}
 

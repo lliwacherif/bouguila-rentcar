@@ -11,8 +11,6 @@ import { UpdateReservationStatusDto } from './dto/update-reservation.dto';
 import { HoldsService } from '../holds/holds.service';
 import { MailService } from '../mail/mail.service';
 
-const TVA_RATE = 0.19;
-
 @Injectable()
 export class ReservationsService {
   constructor(
@@ -47,11 +45,9 @@ export class ReservationsService {
     const holdConflict = await this.holdsService.hasConflict(dto.vehicleId, pickup, dropoff, dto.holdId);
     if (holdConflict) throw new BadRequestException('Ce véhicule est temporairement réservé pour ces dates.');
 
-    // Pricing
-    const totalDays  = Math.ceil((dropoff.getTime() - pickup.getTime()) / 86400000);
-    const subtotalHT = parseFloat(((vehicle.pricePerDay * totalDays) / (1 + TVA_RATE)).toFixed(2));
-    const tva        = parseFloat((subtotalHT * TVA_RATE).toFixed(2));
-    const totalTTC   = parseFloat((vehicle.pricePerDay * totalDays).toFixed(2));
+    // Server-authoritative seasonal pricing. Never trust totals from the browser.
+    const quote = this.vehiclesService.quoteVehicle(vehicle, dto.pickupDate, dto.dropoffDate);
+    const { totalDays, subtotalHT, tva, totalTTC } = quote;
 
     // NEW LOGIC: At creation, 0 TND is paid. Status starts at RECU.
     const amountPaid = 0;
@@ -82,7 +78,11 @@ export class ReservationsService {
       dropoffDate:      dropoff,
       driverAge:        dto.driverAge,
       totalDays,
-      pricePerDay:      vehicle.pricePerDay,
+      pricePerDay:      quote.averageDailyRate,
+      minimumDailyRate: quote.minimumDailyRate,
+      maximumDailyRate: quote.maximumDailyRate,
+      pricingBreakdown: quote.breakdown,
+      pricingCurrency:  quote.currency,
       subtotalHT,
       tva,
       totalTTC,

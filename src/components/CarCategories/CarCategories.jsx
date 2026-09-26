@@ -92,7 +92,7 @@ export default function CarCategories() {
                       className="categories__card"
                       role="link"
                       tabIndex="0"
-                      aria-label={`${vehicle.name} — ${formatPrice(vehicle.pricePerDay, isRtl)} / ${t('searchResults.day', 'jour')}`}
+                      aria-label={`${vehicle.name} — ${formatPrice(vehicle.pricing?.averageDailyRate ?? vehicle.pricePerDay, isRtl)} / ${t('searchResults.day', 'jour')}`}
                       onClick={() => navigate(`/voitures/${vehicle._id}`)}
                       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/voitures/${vehicle._id}`) } }}
                     >
@@ -117,7 +117,7 @@ export default function CarCategories() {
                           <span><FiUsers /> {vehicle.seats}</span><span><FiBriefcase /> {vehicle.bags}</span>
                         </div>
                         <div className="categories__card-footer">
-                          <div><small>{isRtl ? 'السعر لليوم' : 'Prix par jour'}</small><strong>{formatPrice(vehicle.pricePerDay, isRtl)}</strong></div>
+                          <div><small>{isRtl ? 'سعر اليوم شامل الضريبة' : "Aujourd'hui · TTC/jour"}</small><strong>{formatPrice(vehicle.pricing?.averageDailyRate ?? vehicle.pricePerDay, isRtl)}</strong></div>
                           <span className="categories__card-link" aria-hidden="true">{isRtl ? 'التفاصيل' : 'Détails'} <FiArrowUpRight /></span>
                         </div>
                       </div>

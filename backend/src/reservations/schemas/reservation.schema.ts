@@ -24,6 +24,17 @@ export enum PaymentStatus {
   REFUNDED = 'refunded',
 }
 
+@Schema({ _id: false })
+class ReservationPricingLine {
+  @Prop({ required: true, trim: true }) name: string;
+  @Prop({ required: true }) startDate: string;
+  @Prop({ required: true }) endDate: string;
+  @Prop({ required: true, min: 1 }) days: number;
+  @Prop({ required: true, min: 0 }) pricePerDay: number;
+  @Prop({ required: true, min: 0 }) totalTTC: number;
+}
+const ReservationPricingLineSchema = SchemaFactory.createForClass(ReservationPricingLine);
+
 @Schema({ timestamps: true })
 export class Reservation {
   // ── Parties ───────────────────────────────────────────────────────────────
@@ -69,6 +80,18 @@ export class Reservation {
   // ── Pricing ───────────────────────────────────────────────────────────────
   @Prop({ required: true, min: 0 })
   pricePerDay: number;
+
+  @Prop({ min: 0 })
+  minimumDailyRate?: number;
+
+  @Prop({ min: 0 })
+  maximumDailyRate?: number;
+
+  @Prop({ type: [ReservationPricingLineSchema], default: [] })
+  pricingBreakdown: ReservationPricingLine[];
+
+  @Prop({ default: 'TND', trim: true })
+  pricingCurrency: string;
 
   @Prop({ required: true, min: 0 })
   subtotalHT: number;

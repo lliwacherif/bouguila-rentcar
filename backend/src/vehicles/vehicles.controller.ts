@@ -60,6 +60,20 @@ export class VehiclesController {
     return this.vehiclesService.findAllAdmin();
   }
 
+  /** Public, server-authoritative quote for a selected rental period. */
+  @Get(':id/quote')
+  @ApiOperation({ summary: 'Quote a vehicle for a rental period' })
+  @ApiParam({ name: 'id', description: 'MongoDB ObjectId of the vehicle' })
+  @ApiQuery({ name: 'pickupDate', required: true, type: String })
+  @ApiQuery({ name: 'dropoffDate', required: true, type: String })
+  getQuote(
+    @Param('id') id: string,
+    @Query('pickupDate') pickupDate: string,
+    @Query('dropoffDate') dropoffDate: string,
+  ) {
+    return this.vehiclesService.getQuote(id, pickupDate, dropoffDate);
+  }
+
   /**
    * Public endpoint — returns a single vehicle by its MongoDB ObjectId.
    */
