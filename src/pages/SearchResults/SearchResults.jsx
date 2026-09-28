@@ -124,7 +124,12 @@ function CarCard({ car, searchParams }) {
               {formatPrice(pricing.minimumDailyRate, isRtl)} – {formatPrice(pricing.maximumDailyRate, isRtl)}
             </span>
           )}
-          {pricing?.totalDays > 1 && (
+          {pricing?.stampFee > 0 && (
+            <span className="sr-card__price-label">
+              Frais Timbre 2 DT/jour: {formatPrice(pricing.stampFee, isRtl)}
+            </span>
+          )}
+          {(pricing?.totalDays > 1 || pricing?.stampFee > 0) && (
             <span className="sr-card__price-label">
               Total {pricing.totalDays} jours: {formatPrice(pricing.totalTTC, isRtl)}
             </span>

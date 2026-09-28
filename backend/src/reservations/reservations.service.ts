@@ -87,6 +87,7 @@ export class ReservationsService {
       pickupTime,
       dropoffTime,
       extraDayApplied:  quote.extraDayApplied,
+      stampFee:         quote.stampFee,
       driverAge:        dto.driverAge,
       totalDays,
       pricePerDay:      quote.averageDailyRate,

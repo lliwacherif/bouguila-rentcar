@@ -12,15 +12,24 @@ export class RentalSettingsService {
 
   async get() {
     const doc = await this.model.findOne({ key: 'rental' }).exec();
-    return { extraDayIfReturnAfterPickup: Boolean(doc?.extraDayIfReturnAfterPickup) };
+    return {
+      extraDayIfReturnAfterPickup: Boolean(doc?.extraDayIfReturnAfterPickup),
+      stampFeeEnabled: Boolean(doc?.stampFeeEnabled),
+    };
   }
 
-  async setExtraDayIfReturnAfterPickup(enabled: boolean) {
+  async update(patch: { extraDayIfReturnAfterPickup?: boolean; stampFeeEnabled?: boolean }) {
+    const $set: Record<string, boolean> = {};
+    if (patch.extraDayIfReturnAfterPickup !== undefined) $set.extraDayIfReturnAfterPickup = patch.extraDayIfReturnAfterPickup;
+    if (patch.stampFeeEnabled !== undefined) $set.stampFeeEnabled = patch.stampFeeEnabled;
     const doc = await this.model.findOneAndUpdate(
       { key: 'rental' },
-      { $set: { extraDayIfReturnAfterPickup: enabled }, $setOnInsert: { key: 'rental' } },
+      { $set, $setOnInsert: { key: 'rental' } },
       { upsert: true, returnDocument: 'after' },
     ).exec();
-    return { extraDayIfReturnAfterPickup: Boolean(doc?.extraDayIfReturnAfterPickup) };
+    return {
+      extraDayIfReturnAfterPickup: Boolean(doc?.extraDayIfReturnAfterPickup),
+      stampFeeEnabled: Boolean(doc?.stampFeeEnabled),
+    };
   }
 }

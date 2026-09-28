@@ -169,6 +169,12 @@ function ReservationCard({ r }) {
               <span className="hist-billing-row__value">{formatPrice(r.depositAmount, isRtl)}</span>
             </div>
           )}
+          {Number(r.stampFee) > 0 && (
+            <div className="hist-billing-row">
+              <span className="hist-billing-row__label">Frais Timbre 2 DT/jour</span>
+              <span className="hist-billing-row__value">{formatPrice(r.stampFee, isRtl)}</span>
+            </div>
+          )}
           <div className="hist-billing-row hist-billing-row--total">
             <span className="hist-billing-row__label">{t('historique.totalTTC', 'Total TTC')}</span>
             <span className="hist-billing-row__value">{formatPrice(totalTTC, isRtl)}</span>

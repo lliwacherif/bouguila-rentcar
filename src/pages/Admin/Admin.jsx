@@ -1288,6 +1288,9 @@ function StatusModal({ reservation, allReservations = [], onClose, onSaved }) {
             <div style={{ background: 'var(--black-4)', padding: '10px 12px', borderRadius: 6 }}>
               <div style={{ fontSize: 10, color: 'var(--white-50)', marginBottom: 2 }}>MONTANT TOTAL</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--gold)' }}>{fmtMoney(reservation.totalTTC)}</div>
+              {Number(reservation.stampFee) > 0 && (
+                <div style={{ fontSize: 11, color: 'var(--white-50)', marginTop: 4 }}>dont frais timbre {fmtMoney(reservation.stampFee)}</div>
+              )}
             </div>
             <div style={{ background: 'var(--black-4)', padding: '10px 12px', borderRadius: 6 }}>
               <div style={{ fontSize: 10, color: 'var(--white-50)', marginBottom: 2 }}>PAYÉ</div>
@@ -1670,6 +1673,7 @@ export default function Admin() {
   const [draggedVehicle, setDraggedVehicle] = useState(null)
   const [draggedFromParcId, setDraggedFromParcId] = useState(null)
   const [extraDayRule, setExtraDayRule] = useState(false)
+  const [stampFeeRule, setStampFeeRule] = useState(false)
   const [dragOverParc, setDragOverParc] = useState(null)
 
   const loadData = async () => {
@@ -1716,7 +1720,10 @@ export default function Admin() {
   useEffect(() => { loadData() }, [])
   useEffect(() => {
     rentalSettingsService.get()
-      .then(data => setExtraDayRule(Boolean(data?.extraDayIfReturnAfterPickup)))
+      .then(data => {
+        setExtraDayRule(Boolean(data?.extraDayIfReturnAfterPickup))
+        setStampFeeRule(Boolean(data?.stampFeeEnabled))
+      })
       .catch(() => {})
   }, [])
   // Re-fetch calendar data whenever the visible week changes or calendar tab opens
@@ -1871,10 +1878,35 @@ export default function Admin() {
             const previous = extraDayRule
             setExtraDayRule(enabled)
             try {
-              const saved = await rentalSettingsService.update(enabled)
+              const saved = await rentalSettingsService.update({ extraDayIfReturnAfterPickup: enabled })
               setExtraDayRule(Boolean(saved?.extraDayIfReturnAfterPickup))
             } catch (e) {
               setExtraDayRule(previous)
+              alert('Impossible d\'enregistrer le réglage: ' + (e?.response?.data?.message || e?.message || ''))
+            }
+          }}
+        />
+      </div>
+
+      <div className="admin-extra-day">
+        <div>
+          <strong>Frais Timbre 2 DT/Jour</strong>
+          <p>
+            {stampFeeRule
+              ? 'Activé : 2 DT sont ajoutés au total pour chaque jour de location.'
+              : 'Désactivé : aucun frais de timbre n\'est ajouté au total.'}
+          </p>
+        </div>
+        <Toggle
+          active={stampFeeRule}
+          onChange={async (enabled) => {
+            const previous = stampFeeRule
+            setStampFeeRule(enabled)
+            try {
+              const saved = await rentalSettingsService.update({ stampFeeEnabled: enabled })
+              setStampFeeRule(Boolean(saved?.stampFeeEnabled))
+            } catch (e) {
+              setStampFeeRule(previous)
               alert('Impossible d\'enregistrer le réglage: ' + (e?.response?.data?.message || e?.message || ''))
             }
           }}

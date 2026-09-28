@@ -174,6 +174,7 @@ export class VehiclesService {
       pickupTime,
       dropoffTime,
       extraDayIfReturnAfterPickup: settings.extraDayIfReturnAfterPickup,
+      stampFeeEnabled: settings.stampFeeEnabled,
     };
   }
 

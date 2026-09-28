@@ -79,6 +79,9 @@ export class Reservation {
   @Prop({ default: false })
   extraDayApplied: boolean;
 
+  @Prop({ min: 0, default: 0 })
+  stampFee: number;
+
   @Prop({ required: true, min: 18 })
   driverAge: number;
 

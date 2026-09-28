@@ -536,11 +536,17 @@ export default function VehicleDetail() {
               )}
 
               <div className="vd-panel__divider" />
-              <div className="vd-panel__total-row"><span>Total TTC <small>(TVA 19% incluse)</small></span><span className="vd-panel__total">{formatPrice(totalTTC)}</span></div>
+              {pricingQuote?.stampFee > 0 && (
+                <div className="vd-panel__row">
+                  <span>Frais Timbre 2 DT/jour × {totalDays} jour{totalDays > 1 ? 's' : ''}</span>
+                  <span className="vd-panel__row-val">{formatPrice(pricingQuote.stampFee)}</span>
+                </div>
+              )}
+              <div className="vd-panel__total-row"><span>Total{pricingQuote?.stampFee > 0 ? '' : ' TTC'} <small>{pricingQuote?.stampFee > 0 ? '(location + timbre)' : '(TVA 19% incluse)'}</small></span><span className="vd-panel__total">{formatPrice(totalTTC)}</span></div>
 
               <div className="vd-panel__no-fees">
                 <FiShield size={14} color="#16a34a" />
-                <div><span className="vd-panel__no-fees-title">Aucun frais caché</span><span className="vd-panel__no-fees-sub">Le prix final est affiché.</span></div>
+                <div><span className="vd-panel__no-fees-title">{pricingQuote?.stampFee > 0 ? 'Prix final affiché' : 'Aucun frais caché'}</span><span className="vd-panel__no-fees-sub">{pricingQuote?.stampFee > 0 ? 'Le total inclut les frais de timbre.' : 'Le prix final est affiché.'}</span></div>
               </div>
 
               <div className="vd-panel__divider" />

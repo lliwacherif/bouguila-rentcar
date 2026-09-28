@@ -24,6 +24,8 @@ export interface VehicleQuote {
   subtotalHT: number;
   tva: number;
   totalTTC: number;
+  stampFeePerDay: number;
+  stampFee: number;
   breakdown: PricingBreakdownLine[];
 }
 
@@ -31,6 +33,7 @@ export interface QuoteTiming {
   pickupTime?: string;
   dropoffTime?: string;
   extraDayIfReturnAfterPickup?: boolean;
+  stampFeeEnabled?: boolean;
 }
 
 @Injectable()
@@ -92,6 +95,10 @@ export class VehiclePricingService {
     const subtotalHT = this.money(totalTTCRounded / (1 + TVA_RATE));
     const tva = this.money(totalTTCRounded - subtotalHT);
 
+    const STAMP_FEE_PER_DAY = 2;
+    const stampFee = timing?.stampFeeEnabled ? this.money(STAMP_FEE_PER_DAY * totalDays) : 0;
+    const grandTotal = this.money(totalTTCRounded + stampFee);
+
     return {
       currency: 'TND',
       totalDays,
@@ -102,7 +109,9 @@ export class VehiclePricingService {
       averageDailyRate: this.money(totalTTCRounded / totalDays),
       subtotalHT,
       tva,
-      totalTTC: totalTTCRounded,
+      totalTTC: grandTotal,
+      stampFeePerDay: timing?.stampFeeEnabled ? STAMP_FEE_PER_DAY : 0,
+      stampFee,
       breakdown,
     };
   }

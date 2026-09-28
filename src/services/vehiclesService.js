@@ -173,8 +173,8 @@ export const rentalSettingsService = {
     const res = await api.get('/settings/rental')
     return res.data.data
   },
-  async update(extraDayIfReturnAfterPickup) {
-    const res = await api.patch('/settings/rental', { extraDayIfReturnAfterPickup })
+  async update(patch) {
+    const res = await api.patch('/settings/rental', patch)
     return res.data.data
   },
 }
