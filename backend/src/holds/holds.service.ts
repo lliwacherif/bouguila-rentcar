@@ -20,10 +20,13 @@ export class HoldsService {
    */
   async create(dto: CreateHoldDto, userId: string | null): Promise<HoldDocument> {
     const pickup = new Date(dto.pickupDate);
-    const dropoff = new Date(dto.dropoffDate);
+    let dropoff = new Date(dto.dropoffDate);
 
-    if (dropoff <= pickup) {
+    if (dropoff < pickup) {
       throw new BadRequestException('Drop-off date must be after pick-up date');
+    }
+    if (dropoff.getTime() === pickup.getTime()) {
+      dropoff = new Date(pickup.getTime() + 60 * 60 * 1000);
     }
 
     await this.assertNoConflict(dto.vehicleId, pickup, dropoff);

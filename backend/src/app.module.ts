@@ -10,6 +10,7 @@ import { UploadModule } from './upload/upload.module';
 import { HoldsModule } from './holds/holds.module';
 import { ParcsModule } from './parcs/parcs.module';
 import { MailModule } from './mail/mail.module';
+import { RentalSettingsModule } from './rental-settings/rental-settings.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MailModule } from './mail/mail.module';
     HoldsModule,
     ParcsModule,
     MailModule,
+    RentalSettingsModule,
   ],
 })
 export class AppModule {}

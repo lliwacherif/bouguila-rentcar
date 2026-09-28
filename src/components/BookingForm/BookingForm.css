@@ -31,7 +31,10 @@
 .booking__field--narrow { flex: 0.8; min-width: 120px; }
 .booking__field--btn { flex: 0; flex-shrink: 0; }
 
-.booking__label { font-size: 11px; font-weight: 600; color: var(--white-50); letter-spacing: 0.5px; text-transform: uppercase; }
+.booking__input--time {
+  margin-top: 6px;
+  color-scheme: dark;
+}
 .booking__label--hidden { visibility: hidden; }
 
 /* Inputs */

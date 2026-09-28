@@ -16,6 +16,8 @@ export interface PricingBreakdownLine {
 export interface VehicleQuote {
   currency: 'TND';
   totalDays: number;
+  calendarDays: number;
+  extraDayApplied: boolean;
   minimumDailyRate: number;
   maximumDailyRate: number;
   averageDailyRate: number;
@@ -25,21 +27,43 @@ export interface VehicleQuote {
   breakdown: PricingBreakdownLine[];
 }
 
+export interface QuoteTiming {
+  pickupTime?: string;
+  dropoffTime?: string;
+  extraDayIfReturnAfterPickup?: boolean;
+}
+
 @Injectable()
 export class VehiclePricingService {
-  quote(vehicle: Pick<Vehicle, 'pricePerDay' | 'seasonalRates'>, pickupValue: string | Date, dropoffValue: string | Date): VehicleQuote {
+  quote(
+    vehicle: Pick<Vehicle, 'pricePerDay' | 'seasonalRates'>,
+    pickupValue: string | Date,
+    dropoffValue: string | Date,
+    timing?: QuoteTiming,
+  ): VehicleQuote {
     const pickup = this.parseDate(pickupValue, 'pickupDate');
     const dropoff = this.parseDate(dropoffValue, 'dropoffDate');
-    if (dropoff.getTime() <= pickup.getTime()) {
-      throw new BadRequestException('Drop-off date must be after pick-up date');
+    const pickupTime = this.normalizeClock(timing?.pickupTime, 'pickupTime');
+    const dropoffTime = this.normalizeClock(timing?.dropoffTime, 'dropoffTime');
+    const calendarDays = Math.round((dropoff.getTime() - pickup.getTime()) / DAY_MS);
+    const returnLater = this.clockMinutes(dropoffTime) > this.clockMinutes(pickupTime);
+
+    if (calendarDays < 0 || (calendarDays === 0 && !returnLater)) {
+      throw new BadRequestException('Drop-off must be after pick-up');
     }
+
+    // The extra day is only added on top of a rental that already spans at least one calendar day.
+    // A same-day rental is still billed as one day, whether or not the switch is on.
+    const extraDayApplied = Boolean(timing?.extraDayIfReturnAfterPickup) && returnLater && calendarDays >= 1;
+    const totalDays = Math.max(1, calendarDays + (extraDayApplied ? 1 : 0));
+    const billableEnd = new Date(pickup.getTime() + totalDays * DAY_MS);
 
     const breakdown: PricingBreakdownLine[] = [];
     let totalTTC = 0;
     let minimumDailyRate = Number.POSITIVE_INFINITY;
     let maximumDailyRate = 0;
 
-    for (let cursor = pickup.getTime(); cursor < dropoff.getTime(); cursor += DAY_MS) {
+    for (let cursor = pickup.getTime(); cursor < billableEnd.getTime(); cursor += DAY_MS) {
       const date = new Date(cursor);
       const rate = this.rateForDate(vehicle, date);
       const dateKey = this.toDateKey(date);
@@ -64,20 +88,21 @@ export class VehiclePricingService {
       }
     }
 
-    const totalDays = Math.round((dropoff.getTime() - pickup.getTime()) / DAY_MS);
-    totalTTC = this.money(totalTTC);
-    const subtotalHT = this.money(totalTTC / (1 + TVA_RATE));
-    const tva = this.money(totalTTC - subtotalHT);
+    const totalTTCRounded = this.money(totalTTC);
+    const subtotalHT = this.money(totalTTCRounded / (1 + TVA_RATE));
+    const tva = this.money(totalTTCRounded - subtotalHT);
 
     return {
       currency: 'TND',
       totalDays,
+      calendarDays,
+      extraDayApplied,
       minimumDailyRate: this.money(minimumDailyRate),
       maximumDailyRate: this.money(maximumDailyRate),
-      averageDailyRate: this.money(totalTTC / totalDays),
+      averageDailyRate: this.money(totalTTCRounded / totalDays),
       subtotalHT,
       tva,
-      totalTTC,
+      totalTTC: totalTTCRounded,
       breakdown,
     };
   }
@@ -169,5 +194,18 @@ export class VehiclePricingService {
 
   private money(value: number): number {
     return Number(value.toFixed(2));
+  }
+
+  private normalizeClock(value: string | undefined, label: string): string {
+    const time = (value || '10:00').trim();
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      throw new BadRequestException(`${label} must be HH:mm`);
+    }
+    return time;
+  }
+
+  private clockMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
   }
 }

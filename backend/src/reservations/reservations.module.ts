@@ -6,6 +6,7 @@ import { Reservation, ReservationSchema } from './schemas/reservation.schema';
 import { VehiclesModule } from '../vehicles/vehicles.module';
 import { HoldsModule } from '../holds/holds.module';
 import { MailModule } from '../mail/mail.module';
+import { RentalSettingsModule } from '../rental-settings/rental-settings.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MailModule } from '../mail/mail.module';
     VehiclesModule,
     HoldsModule,
     MailModule,
+    RentalSettingsModule,
   ],
   providers: [ReservationsService],
   controllers: [ReservationsController],

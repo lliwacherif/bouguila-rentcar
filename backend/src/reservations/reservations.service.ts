@@ -10,6 +10,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationStatusDto } from './dto/update-reservation.dto';
 import { HoldsService } from '../holds/holds.service';
 import { MailService } from '../mail/mail.service';
+import { RentalSettingsService } from '../rental-settings/rental-settings.service';
 
 @Injectable()
 export class ReservationsService {
@@ -19,6 +20,7 @@ export class ReservationsService {
     private readonly vehiclesService: VehiclesService,
     private readonly holdsService: HoldsService,
     private readonly mailService: MailService,
+    private readonly rentalSettings: RentalSettingsService,
   ) {}
 
   // ── Create ───────────────────────────────────────────────────────────────
@@ -29,9 +31,16 @@ export class ReservationsService {
       throw new BadRequestException('Vehicle is not available for reservation');
     }
 
-    const pickup  = new Date(dto.pickupDate);
-    const dropoff = new Date(dto.dropoffDate);
-    if (dropoff <= pickup) throw new BadRequestException('Drop-off date must be after pick-up date');
+    const pickupTime = dto.pickupTime || '10:00';
+    const dropoffTime = dto.dropoffTime || '10:00';
+    const settings = await this.rentalSettings.get();
+    const quote = this.vehiclesService.quoteVehicle(vehicle, dto.pickupDate, dto.dropoffDate, {
+      pickupTime,
+      dropoffTime,
+      extraDayIfReturnAfterPickup: settings.extraDayIfReturnAfterPickup,
+    });
+    const pickup = this.combineClock(dto.pickupDate, pickupTime);
+    const dropoff = this.combineClock(dto.dropoffDate, dropoffTime);
 
     // Conflict check — only CONFIRMED reservations actually lock the car
     const conflict = await this.reservationModel.findOne({
@@ -46,7 +55,6 @@ export class ReservationsService {
     if (holdConflict) throw new BadRequestException('Ce véhicule est temporairement réservé pour ces dates.');
 
     // Server-authoritative seasonal pricing. Never trust totals from the browser.
-    const quote = this.vehiclesService.quoteVehicle(vehicle, dto.pickupDate, dto.dropoffDate);
     const { totalDays, subtotalHT, tva, totalTTC } = quote;
 
     // NEW LOGIC: At creation, 0 TND is paid. Status starts at RECU.
@@ -76,6 +84,9 @@ export class ReservationsService {
       dropoffLocation:  dto.dropoffLocation,
       pickupDate:       pickup,
       dropoffDate:      dropoff,
+      pickupTime,
+      dropoffTime,
+      extraDayApplied:  quote.extraDayApplied,
       driverAge:        dto.driverAge,
       totalDays,
       pricePerDay:      quote.averageDailyRate,
@@ -128,6 +139,12 @@ export class ReservationsService {
   }
 
   /** Visitor bookings must carry a name and phone. Email stays optional. */
+  private combineClock(dateValue: string, timeValue: string): Date {
+    const [year, month, day] = dateValue.slice(0, 10).split('-').map(Number);
+    const [hours, minutes] = timeValue.split(':').map(Number);
+    return new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+  }
+
   private requireGuestContact(dto: CreateReservationDto) {
     const name = dto.guestName?.trim().replace(/\s+/g, ' ') || '';
     const phone = dto.guestPhone?.trim() || '';

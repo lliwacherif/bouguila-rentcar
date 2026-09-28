@@ -107,13 +107,20 @@ export class CreateVehicleDto {
   @ApiPropertyOptional({ example: 500 })
   @IsOptional() @IsNumber() @Min(0) depositAmount?: number;
 
-  @ApiPropertyOptional({ example: '64abc...', description: 'Parc (parking location) ID' })
+  @ApiPropertyOptional({ example: '64abc...', description: 'Replaces every assignment with this single parc. Send null to clear.' })
   @IsOptional() @IsString() parcId?: string;
 
-  /** Populated parc returned by reads. Ignored on create/update; use parcId to assign one. */
+  @ApiPropertyOptional({ type: [String], description: 'Parc ids this vehicle is available from. Replaces the full list.' })
+  @IsOptional() @IsArray() @IsString({ each: true }) parcIds?: string[];
+
+  /** Populated parc fields returned by reads. Ignored on write. */
   @Allow()
   @IsOptional()
   parc?: unknown;
+
+  @Allow()
+  @IsOptional()
+  parcs?: unknown;
 
   @ApiPropertyOptional({ example: 21 })
   @IsOptional() @IsNumber() @Min(18) minDriverAge?: number;

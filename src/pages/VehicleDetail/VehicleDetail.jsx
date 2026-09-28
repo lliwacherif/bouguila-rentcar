@@ -47,6 +47,8 @@ export default function VehicleDetail() {
   const [booking, setBooking] = useState({
     pickupDate: urlPickup,
     dropoffDate: urlDropoff,
+    pickupTime: searchParams.get('pickupTime') || '10:00',
+    dropoffTime: searchParams.get('dropoffTime') || '10:00',
     pickupLocation: urlLocation,
     dropoffLocation: urlLocation,
     driverAge: effectiveAge,
@@ -120,7 +122,11 @@ export default function VehicleDetail() {
         }
 
         // If car has an assigned parc, and no custom location was in URL params, pre-fill location
-        const parcName = data?.parc?.name || (typeof data?.parc === 'string' ? data.parc : null)
+        const assigned = Array.isArray(data?.parcs) && data.parcs.length
+          ? data.parcs
+          : (data?.parc ? [data.parc] : [])
+        const parcName = assigned.find(parc => parc?.name)?.name
+          || (typeof data?.parc === 'string' ? data.parc : null)
         if (parcName) {
           setBooking(prev => ({
             ...prev,
@@ -140,14 +146,14 @@ export default function VehicleDetail() {
 
   // Refresh the authoritative server quote whenever the visitor changes dates.
   useEffect(() => {
-    if (!car?._id || !booking.pickupDate || !booking.dropoffDate || booking.dropoffDate <= booking.pickupDate) {
+    if (!car?._id || !booking.pickupDate || !booking.dropoffDate) {
       setPricingQuote(null)
       return undefined
     }
     let active = true
     setQuoteLoading(true)
     setQuoteError('')
-    vehiclesService.getQuote(car._id, booking.pickupDate, booking.dropoffDate)
+    vehiclesService.getQuote(car._id, booking.pickupDate, booking.dropoffDate, booking.pickupTime, booking.dropoffTime)
       .then(data => { if (active) setPricingQuote(data) })
       .catch(err => {
         if (active) {
@@ -157,7 +163,7 @@ export default function VehicleDetail() {
       })
       .finally(() => { if (active) setQuoteLoading(false) })
     return () => { active = false }
-  }, [car?._id, booking.pickupDate, booking.dropoffDate])
+  }, [car?._id, booking.pickupDate, booking.dropoffDate, booking.pickupTime, booking.dropoffTime])
 
   if (loading) return (
     <div className="vd-page">
@@ -184,7 +190,7 @@ export default function VehicleDetail() {
     return d > 0 ? d : 7
   }
 
-  const totalDays = calcDays()
+  const totalDays = pricingQuote?.totalDays ?? calcDays()
   const fallbackTotalTTC = car.pricePerDay * totalDays
   const fallbackSubtotalHT = parseFloat((fallbackTotalTTC / (1 + TVA_RATE)).toFixed(2))
   const totalTTC = pricingQuote?.totalTTC ?? fallbackTotalTTC
@@ -199,6 +205,10 @@ export default function VehicleDetail() {
     { label: 'Totalité', pct: '100%', amount: totalTTC.toFixed(2), key: 'total' },
   ]
 
+  const assignedParcs = (Array.isArray(car?.parcs) ? car.parcs : [])
+    .filter(parc => parc && typeof parc === 'object' && parc._id)
+  const singleParc = car?.parc && typeof car.parc === 'object' && car.parc._id ? [car.parc] : []
+  const locationParcs = assignedParcs.length ? assignedParcs : (singleParc.length ? singleParc : parcs)
   const toPay = parseFloat(paymentOptions[paymentOption].amount)
   const images = car.images?.length > 0 ? car.images : ['/car_renault_clio_gray.png']
 
@@ -219,7 +229,11 @@ export default function VehicleDetail() {
     let holdId = holdIdRef.current
     if (!holdId) {
       try {
-        const hold = await holdsService.create(car._id, booking.pickupDate, booking.dropoffDate)
+        const hold = await holdsService.create(
+          car._id,
+          `${booking.pickupDate}T${booking.pickupTime || '10:00'}:00.000Z`,
+          `${booking.dropoffDate}T${booking.dropoffTime || '10:00'}:00.000Z`,
+        )
         holdId = hold._id
         holdIdRef.current = holdId
       } catch (err) {
@@ -243,6 +257,8 @@ export default function VehicleDetail() {
       vehicleId: car._id,
       pickupDate: booking.pickupDate,
       dropoffDate: booking.dropoffDate,
+      pickupTime: booking.pickupTime || '10:00',
+      dropoffTime: booking.dropoffTime || '10:00',
       pickupLocation: booking.pickupLocation,
       dropoffLocation: booking.dropoffLocation,
       driverAge: effectiveAge,   // always use account age when logged in
@@ -256,6 +272,8 @@ export default function VehicleDetail() {
     vehicleId: car._id,
     pickupDate: booking.pickupDate,
     dropoffDate: booking.dropoffDate,
+    pickupTime: booking.pickupTime || '10:00',
+    dropoffTime: booking.dropoffTime || '10:00',
     pickupLocation: booking.pickupLocation,
     dropoffLocation: booking.dropoffLocation,
     driverAge: Number(booking.driverAge) || 30,
@@ -395,7 +413,7 @@ export default function VehicleDetail() {
                 <div style={{ width: 220, maxWidth: '100%' }}>
                   <span className="vd-detail-row__label">Lieu de prise en charge</span>
                   <ParcSelect
-                    parcs={parcs}
+                    parcs={locationParcs}
                     value={booking.pickupLocation}
                     onChange={(parcId, parcName) => setBooking(b => ({ ...b, pickupLocation: parcName }))}
                     placeholder="Sélectionnez un parc"
@@ -408,7 +426,7 @@ export default function VehicleDetail() {
                 <div style={{ width: 220, maxWidth: '100%' }}>
                   <span className="vd-detail-row__label">Lieu de restitution</span>
                   <ParcSelect
-                    parcs={parcs}
+                    parcs={locationParcs}
                     value={booking.dropoffLocation}
                     onChange={(parcId, parcName) => setBooking(b => ({ ...b, dropoffLocation: parcName }))}
                     placeholder="Sélectionnez un parc"
@@ -421,6 +439,7 @@ export default function VehicleDetail() {
                 <div>
                   <span className="vd-detail-row__label">Date de prise en charge</span>
                   <input type="date" className="vd-input" value={booking.pickupDate} min={new Date().toISOString().split('T')[0]} onChange={e => setBooking(b => ({ ...b, pickupDate: e.target.value }))} />
+                  <input type="time" className="vd-input" aria-label="Heure de prise en charge" value={booking.pickupTime} onChange={e => setBooking(b => ({ ...b, pickupTime: e.target.value }))} style={{ marginTop: 6 }} />
                 </div>
               </div>
               <div className="vd-detail-row">
@@ -428,6 +447,7 @@ export default function VehicleDetail() {
                 <div>
                   <span className="vd-detail-row__label">Date de restitution</span>
                   <input type="date" className="vd-input" value={booking.dropoffDate} min={booking.pickupDate || new Date().toISOString().split('T')[0]} onChange={e => setBooking(b => ({ ...b, dropoffDate: e.target.value }))} />
+                  <input type="time" className="vd-input" aria-label="Heure de restitution" value={booking.dropoffTime} onChange={e => setBooking(b => ({ ...b, dropoffTime: e.target.value }))} style={{ marginTop: 6 }} />
                 </div>
               </div>
               <div className="vd-detail-row">
@@ -492,7 +512,7 @@ export default function VehicleDetail() {
               <div className="vd-panel__divider" />
 
               <div className="vd-panel__row"><span>{hasRateRange ? 'Prix moyen par jour' : 'Prix par jour'}</span><div className="vd-panel__row-right"><span className="vd-panel__row-val">{formatPrice(displayedDailyRate)}</span><span className="vd-panel__row-note">(TTC)</span></div></div>
-              <div className="vd-panel__row"><span>Durée</span><span className="vd-panel__row-val">{totalDays} jours</span></div>
+              <div className="vd-panel__row"><span>Durée</span><span className="vd-panel__row-val">{totalDays} jour{totalDays > 1 ? 's' : ''}{pricingQuote?.extraDayApplied ? ' (heure de retour)' : ''}</span></div>
               <div className="vd-panel__row vd-panel__row--bold"><span>Sous-total HT</span><span>{formatPrice(subtotalHT)}</span></div>
 
               {quoteLoading && <div className="vd-panel__row"><span>Actualisation du tarif…</span></div>}

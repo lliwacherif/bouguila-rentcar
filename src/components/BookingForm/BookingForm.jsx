@@ -22,6 +22,8 @@ export default function BookingForm() {
     parcId: '',
     pickupDate: today,
     dropoffDate: inSevenDays,
+    pickupTime: '10:00',
+    dropoffTime: '10:00',
     driverAge: '',
   })
 
@@ -48,6 +50,8 @@ export default function BookingForm() {
       ...(form.parcId && { parcId: form.parcId }),
       pickupDate: form.pickupDate,
       dropoffDate: form.dropoffDate,
+      pickupTime: form.pickupTime || '10:00',
+      dropoffTime: form.dropoffTime || '10:00',
       driverAge: effectiveAge || '18',
     })
     navigate(`/voitures?${params.toString()}`)
@@ -130,9 +134,14 @@ export default function BookingForm() {
                 />
                 <FiCalendar className="booking__input-icon-right" size={15} />
               </div>
+              <input
+                type="time"
+                aria-label="Heure de prise en charge"
+                className="booking__input booking__input--time"
+                value={form.pickupTime}
+                onChange={set('pickupTime')}
+              />
             </div>
-
-            {/* Date restitution */}
             <div className="booking__field">
               <label className="booking__label">{t('booking.dropoffDate', 'Date de restitution')}</label>
               <div className="booking__input-wrap">
@@ -146,6 +155,13 @@ export default function BookingForm() {
                 />
                 <FiCalendar className="booking__input-icon-right" size={15} />
               </div>
+              <input
+                type="time"
+                aria-label="Heure de restitution"
+                className="booking__input booking__input--time"
+                value={form.dropoffTime}
+                onChange={set('dropoffTime')}
+              />
             </div>
 
             {/* Âge du conducteur — locked when logged in */}

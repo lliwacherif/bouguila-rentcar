@@ -10,7 +10,8 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { QueryVehicleDto } from './dto/query-vehicle.dto';
 import { Reservation, ReservationDocument, ReservationStatus } from '../reservations/schemas/reservation.schema';
-import { VehiclePricingService } from './vehicle-pricing.service';
+import { VehiclePricingService, QuoteTiming } from './vehicle-pricing.service';
+import { RentalSettingsService } from '../rental-settings/rental-settings.service';
 
 @Injectable()
 export class VehiclesService {
@@ -20,15 +21,31 @@ export class VehiclesService {
     @InjectModel(Reservation.name)
     private readonly reservationModel: Model<ReservationDocument>,
     private readonly pricingService: VehiclePricingService,
+    private readonly rentalSettings: RentalSettingsService,
   ) {}
+
+  /** parcIds replaces the full set. parcId still sets a single parc for older clients. */
+  private parcAssignment(parcIds?: string[] | null, parcId?: string | null): Record<string, unknown> {
+    if (Array.isArray(parcIds)) {
+      const ids = [...new Set(parcIds.filter(Boolean))].map((id) => new Types.ObjectId(id));
+      return { parcs: ids, parc: ids[0] ?? null };
+    }
+    if (parcId !== undefined) {
+      if (!parcId) return { parcs: [], parc: null };
+      const id = new Types.ObjectId(parcId);
+      return { parcs: [id], parc: id };
+    }
+    return {};
+  }
 
   async create(dto: CreateVehicleDto) {
     this.pricingService.validatePeriods(dto.seasonalRates as SeasonalRate[] | undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { parcId, parc: _populatedParc, ...rest } = dto as any;
+    const { parcId, parcIds, parc: _populatedParc, parcs: _populatedParcs, ...rest } = dto as any;
+    const assignment = this.parcAssignment(parcIds, parcId);
     return this.vehicleModel.create({
       ...rest,
-      ...(parcId ? { parc: new Types.ObjectId(parcId) } : {}),
+      ...assignment,
     });
   }
 
@@ -37,7 +54,7 @@ export class VehiclesService {
       category, transmission, fuel, status,
       minPrice, maxPrice, seats, ac, gps,
       page = 1, limit = 10, sortBy = 'pricePerDay', sortOrder = 'asc',
-      pickupDate, dropoffDate, driverAge, parcId,
+      pickupDate, dropoffDate, pickupTime, dropoffTime, driverAge, parcId,
     } = query;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,7 +77,8 @@ export class VehiclesService {
     // ── Parc filter ───────────────────────────────────────────────────────────
     // Only show vehicles assigned to the selected parc
     if (parcId) {
-      filter.parc = new Types.ObjectId(parcId);
+      const id = new Types.ObjectId(parcId);
+      filter.$or = [{ parcs: id }, { parc: id }];
     }
     // ── Availability filter ──────────────────────────────────────────────────
     // Exclude any vehicle that has a pending/confirmed reservation overlapping
@@ -93,10 +111,13 @@ export class VehiclesService {
 
     // Seasonal rates are computed values, so price filtering/sorting must happen
     // after each eligible vehicle has been quoted for the requested stay.
+    const timing = pickupDate && dropoffDate
+      ? await this.timingFor(pickupTime, dropoffTime)
+      : undefined;
     const documents = await this.vehicleModel.find(filter).exec();
     let vehicles = documents.map(document => {
       const pricing = pickupDate && dropoffDate
-        ? this.pricingService.quote(document, pickupDate, dropoffDate)
+        ? this.pricingService.quote(document, pickupDate, dropoffDate, timing)
         : this.pricingService.quoteToday(document);
       return { ...document.toObject(), pricing };
     });
@@ -123,28 +144,44 @@ export class VehiclesService {
   }
 
   async findOne(id: string) {
-    const vehicle = await this.vehicleModel.findById(id).exec();
+    const vehicle = await this.vehicleModel
+      .findById(id)
+      .populate('parc', 'name city address')
+      .populate('parcs', 'name city address')
+      .exec();
     if (!vehicle) throw new NotFoundException('Vehicle not found');
     return vehicle;
   }
 
-  async getQuote(id: string, pickupDate: string, dropoffDate: string) {
+  async getQuote(id: string, pickupDate: string, dropoffDate: string, pickupTime?: string, dropoffTime?: string) {
     const vehicle = await this.findOne(id);
-    return this.pricingService.quote(vehicle, pickupDate, dropoffDate);
+    const timing = await this.timingFor(pickupTime, dropoffTime);
+    return this.pricingService.quote(vehicle, pickupDate, dropoffDate, timing);
   }
 
-  quoteVehicle(vehicle: Pick<Vehicle, 'pricePerDay' | 'seasonalRates'>, pickupDate: string | Date, dropoffDate: string | Date) {
-    return this.pricingService.quote(vehicle, pickupDate, dropoffDate);
+  quoteVehicle(
+    vehicle: Pick<Vehicle, 'pricePerDay' | 'seasonalRates'>,
+    pickupDate: string | Date,
+    dropoffDate: string | Date,
+    timing?: QuoteTiming,
+  ) {
+    return this.pricingService.quote(vehicle, pickupDate, dropoffDate, timing);
+  }
+
+  private async timingFor(pickupTime?: string, dropoffTime?: string): Promise<QuoteTiming> {
+    const settings = await this.rentalSettings.get();
+    return {
+      pickupTime,
+      dropoffTime,
+      extraDayIfReturnAfterPickup: settings.extraDayIfReturnAfterPickup,
+    };
   }
 
   async update(id: string, dto: UpdateVehicleDto) {
     this.pricingService.validatePeriods(dto.seasonalRates as SeasonalRate[] | undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { parcId, parc: _populatedParc, ...rest } = dto as any;
-    const update: Record<string, any> = { ...rest };
-    if (parcId !== undefined) {
-      update.parc = parcId ? new Types.ObjectId(parcId) : null;
-    }
+    const { parcId, parcIds, parc: _populatedParc, parcs: _populatedParcs, ...rest } = dto as any;
+    const update: Record<string, any> = { ...rest, ...this.parcAssignment(parcIds, parcId) };
     const vehicle = await this.vehicleModel
       .findByIdAndUpdate(id, update, { returnDocument: 'after' })
       .exec();
@@ -186,7 +223,11 @@ export class VehiclesService {
 
   // Admin: find all regardless of isActive, with parc populated
   async findAllAdmin() {
-    return this.vehicleModel.find().populate('parc', 'name city address').exec();
+    return this.vehicleModel
+      .find()
+      .populate('parc', 'name city address')
+      .populate('parcs', 'name city address')
+      .exec();
   }
 
   // ── Status sync ─────────────────────────────────────────────────────────────

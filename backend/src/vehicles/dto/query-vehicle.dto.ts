@@ -34,6 +34,8 @@ export class QueryVehicleDto {
   /** Availability window — exclude vehicles booked during this range */
   @IsOptional() @IsDateString() pickupDate?: string;
   @IsOptional() @IsDateString() dropoffDate?: string;
+  @IsOptional() @IsString() pickupTime?: string;
+  @IsOptional() @IsString() dropoffTime?: string;
 
   /** Filter out cars whose minDriverAge > driverAge */
   @IsOptional() @Type(() => Number) @IsNumber() @Min(18) driverAge?: number;

@@ -16,8 +16,10 @@ export const vehiclesService = {
     return res.data.data
   },
 
-  async getQuote(id, pickupDate, dropoffDate) {
-    const res = await api.get(`/vehicles/${id}/quote`, { params: { pickupDate, dropoffDate } })
+  async getQuote(id, pickupDate, dropoffDate, pickupTime = '10:00', dropoffTime = '10:00') {
+    const res = await api.get(`/vehicles/${id}/quote`, {
+      params: { pickupDate, dropoffDate, pickupTime, dropoffTime },
+    })
     return res.data.data
   },
 
@@ -162,6 +164,17 @@ export const parcsService = {
 
   async remove(id) {
     const res = await api.delete(`/parcs/${id}`)
+    return res.data.data
+  },
+}
+
+export const rentalSettingsService = {
+  async get() {
+    const res = await api.get('/settings/rental')
+    return res.data.data
+  },
+  async update(extraDayIfReturnAfterPickup) {
+    const res = await api.patch('/settings/rental', { extraDayIfReturnAfterPickup })
     return res.data.data
   },
 }

@@ -5,7 +5,7 @@ import {
   FiAlertCircle, FiRefreshCw, FiX, FiCheck, FiTrendingUp, FiTrendingDown,
   FiDollarSign, FiBarChart2, FiUpload, FiStar, FiClock, FiList, FiTool, FiUser,
 } from 'react-icons/fi'
-import { vehiclesService, reservationsService, uploadService, parcsService } from '../../services/vehiclesService'
+import { vehiclesService, reservationsService, uploadService, parcsService, rentalSettingsService } from '../../services/vehiclesService'
 import { mediaUrl } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useCurrency } from '../../context/CurrencyContext'
@@ -35,6 +35,24 @@ function StatusDot({ status }) {
       <span className="admin-status__label" style={{ color: c[status] || 'var(--white-50)' }}>{status}</span>
     </span>
   )
+}
+
+function vehicleParcIds(vehicle) {
+  if (!vehicle) return []
+  const many = Array.isArray(vehicle.parcs) ? vehicle.parcs : []
+  const ids = many
+    .map(parc => String(parc?._id || parc || ''))
+    .filter(id => id && id !== 'undefined' && id !== 'null')
+  if (ids.length) return [...new Set(ids)]
+  if (vehicle.parc) {
+    const id = String(vehicle.parc?._id || vehicle.parc)
+    return id && id !== 'undefined' && id !== 'null' ? [id] : []
+  }
+  return []
+}
+
+function vehicleInParc(vehicle, parcId) {
+  return vehicleParcIds(vehicle).includes(String(parcId))
 }
 
 function clientContact(r) {
@@ -236,6 +254,14 @@ function dayStatus(v, reservations, date) {
 function fmtDate(s) {
   if (!s) return '—'
   return new Date(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function fmtWhen(date, time) {
+  if (!date) return '—'
+  const iso = new Date(date).toISOString().slice(0, 10)
+  const [year, month, day] = iso.split('-')
+  const label = `${day}/${month}/${year}`
+  return time ? `${label} · ${time}` : fmtDate(date)
 }
 function fmtMoney(n) {
   if (n == null) return '—'
@@ -444,7 +470,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
       // Strip MongoDB metadata and the populated parc object.
       // The API accepts parcId, not parc, and rejects unknown fields.
       // eslint-disable-next-line no-unused-vars
-      const { _id, id, __v, createdAt, updatedAt, status, isActive, parc, pricing, ...cleanPayload } = payload
+      const { _id, id, __v, createdAt, updatedAt, status, isActive, parc, parcs, pricing, ...cleanPayload } = payload
 
       if (vehicle) await vehiclesService.update(vehicle._id, cleanPayload)
       else         await vehiclesService.create(cleanPayload)
@@ -1642,6 +1668,8 @@ export default function Admin() {
   // Parcs UI state
   const [parcModal, setParcModal] = useState(null)   // null | 'add' | parc obj
   const [draggedVehicle, setDraggedVehicle] = useState(null)
+  const [draggedFromParcId, setDraggedFromParcId] = useState(null)
+  const [extraDayRule, setExtraDayRule] = useState(false)
   const [dragOverParc, setDragOverParc] = useState(null)
 
   const loadData = async () => {
@@ -1686,6 +1714,11 @@ export default function Admin() {
   }
 
   useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    rentalSettingsService.get()
+      .then(data => setExtraDayRule(Boolean(data?.extraDayIfReturnAfterPickup)))
+      .catch(() => {})
+  }, [])
   // Re-fetch calendar data whenever the visible week changes or calendar tab opens
   useEffect(() => {
     if (activeTab === 'calendar') loadCalendarData()
@@ -1715,6 +1748,21 @@ export default function Admin() {
     } catch (e) {
       alert('Impossible de supprimer: ' + (e?.message || 'erreur inconnue'))
     }
+  }
+
+  const saveVehicleParcs = async (vehicle, parcIds) => {
+    await vehiclesService.update(vehicle._id, { parcIds })
+    await loadData()
+  }
+
+  const addVehicleToParc = async (vehicle, parcId) => {
+    const ids = vehicleParcIds(vehicle)
+    if (ids.includes(String(parcId))) return
+    await saveVehicleParcs(vehicle, [...ids, String(parcId)])
+  }
+
+  const removeVehicleFromParc = async (vehicle, parcId) => {
+    await saveVehicleParcs(vehicle, vehicleParcIds(vehicle).filter(id => id !== String(parcId)))
   }
 
   const handleDeleteReservation = async (reservation) => {
@@ -1806,6 +1854,31 @@ export default function Admin() {
           </p>
         </div>
         <button className="admin-btn admin-btn--outline" onClick={loadData}><FiRefreshCw size={13}/> Actualiser</button>
+      </div>
+
+      <div className="admin-extra-day">
+        <div>
+          <strong>Jour supplémentaire à l'heure de retour</strong>
+          <p>
+            {extraDayRule
+              ? 'Activé : si l\'heure de retour dépasse l\'heure de prise en charge, un jour de plus est compté.'
+              : 'Désactivé : si l\'heure de retour dépasse l\'heure de prise en charge, aucun jour supplémentaire n\'est compté.'}
+          </p>
+        </div>
+        <Toggle
+          active={extraDayRule}
+          onChange={async (enabled) => {
+            const previous = extraDayRule
+            setExtraDayRule(enabled)
+            try {
+              const saved = await rentalSettingsService.update(enabled)
+              setExtraDayRule(Boolean(saved?.extraDayIfReturnAfterPickup))
+            } catch (e) {
+              setExtraDayRule(previous)
+              alert('Impossible d\'enregistrer le réglage: ' + (e?.response?.data?.message || e?.message || ''))
+            }
+          }}
+        />
       </div>
 
       {/* Tabs */}
@@ -2305,7 +2378,8 @@ export default function Admin() {
                           <div className="admin-table__car-year">{r.vehicle?.plate}</div>
                         </td>
                         <td style={{ fontSize: 11.5, color: 'var(--white-50)' }}>
-                          {fmtDate(r.pickupDate)}<br/>{fmtDate(r.dropoffDate)}
+                          {fmtWhen(r.pickupDate, r.pickupTime)}<br/>{fmtWhen(r.dropoffDate, r.dropoffTime)}
+                          {r.extraDayApplied ? <div style={{ color: 'var(--gold)', marginTop: 4 }}>+1 jour (heure)</div> : null}
                         </td>
                         <td style={{ fontWeight: 700, color: 'var(--white)' }}>{r.totalDays}</td>
                          <td style={{ textAlign: 'center', fontSize: 18, lineHeight: 1 }}>
@@ -2566,7 +2640,7 @@ export default function Admin() {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
             <div>
               <h2 style={{ fontSize:22, fontWeight:700, color:'var(--white)', margin:0 }}>Affectation des Véhicules par Parc</h2>
-              <p style={{ fontSize:13, color:'var(--white-50)', margin:'4px 0 0' }}>Glissez-déposez les véhicules pour les affecter à un parc</p>
+              <p style={{ fontSize:13, color:'var(--white-50)', margin:'4px 0 0' }}>Glissez un véhicule sur plusieurs parcs pour le proposer dans chacun d'eux.</p>
             </div>
             <button className="admin-btn admin-btn--primary" onClick={() => setParcModal('add')}>
               <FiPlus size={14}/> Nouveau Parc
@@ -2582,28 +2656,32 @@ export default function Admin() {
               onDragLeave={() => setDragOverParc(null)}
               onDrop={async () => {
                 setDragOverParc(null)
-                if (!draggedVehicle) return
+                if (!draggedVehicle || !draggedFromParcId) {
+                  setDraggedVehicle(null)
+                  setDraggedFromParcId(null)
+                  return
+                }
                 try {
-                  await vehiclesService.update(draggedVehicle._id, { parcId: null })
-                  await loadData()
+                  await removeVehicleFromParc(draggedVehicle, draggedFromParcId)
                 } catch { /* ignore */ }
                 setDraggedVehicle(null)
+                setDraggedFromParcId(null)
               }}
             >
               <div className="parc-col__header">
                 <span className="parc-col__title">Véhicules non affectés</span>
                 <span className="parc-col__badge" style={{ background:'var(--white-10)', color:'var(--white-50)' }}>
-                  {vehicles.filter(v => !v.parc).length}
+                  {vehicles.filter(v => vehicleParcIds(v).length === 0).length}
                 </span>
               </div>
               <div className="parc-col__body">
-                {vehicles.filter(v => !v.parc).map(v => (
+                {vehicles.filter(v => vehicleParcIds(v).length === 0).map(v => (
                   <div
                     key={v._id}
                     className="parc-vehicle-card"
                     draggable
-                    onDragStart={() => setDraggedVehicle(v)}
-                    onDragEnd={() => setDraggedVehicle(null)}
+                    onDragStart={() => { setDraggedVehicle(v); setDraggedFromParcId(null) }}
+                    onDragEnd={() => { setDraggedVehicle(null); setDraggedFromParcId(null) }}
                   >
                     {v.images?.[0]
                       ? <img src={mediaUrl(v.images[0])} alt={v.name} className="parc-vehicle-card__img" />
@@ -2616,7 +2694,7 @@ export default function Admin() {
                     <span className="parc-drag-handle">⠿</span>
                   </div>
                 ))}
-                {vehicles.filter(v => !v.parc).length === 0 && (
+                {vehicles.filter(v => vehicleParcIds(v).length === 0).length === 0 && (
                   <p style={{ fontSize:12, color:'var(--white-30)', textAlign:'center', padding:'20px 0' }}>Tous les véhicules sont affectés</p>
                 )}
               </div>
@@ -2633,10 +2711,10 @@ export default function Admin() {
                   setDragOverParc(null)
                   if (!draggedVehicle) return
                   try {
-                    await vehiclesService.update(draggedVehicle._id, { parcId: parc._id })
-                    await loadData()
+                    await addVehicleToParc(draggedVehicle, parc._id)
                   } catch { /* ignore */ }
                   setDraggedVehicle(null)
+                  setDraggedFromParcId(null)
                 }}
               >
                 <div className="parc-col__header">
@@ -2646,7 +2724,7 @@ export default function Admin() {
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                     <span className="parc-col__badge">
-                      {vehicles.filter(v => v.parc?._id === parc._id || v.parc === parc._id).length}/{parc.capacity}
+                      {vehicles.filter(v => vehicleInParc(v, parc._id)).length}/{parc.capacity}
                     </span>
                     <button
                       className="admin-btn admin-btn--icon"
@@ -2670,14 +2748,14 @@ export default function Admin() {
                 <div className="parc-col__drop-zone">
                   <span className="parc-drop-label">Drop Zone</span>
                   {vehicles
-                    .filter(v => v.parc?._id === parc._id || v.parc === parc._id)
+                    .filter(v => vehicleInParc(v, parc._id))
                     .map(v => (
                       <div
                         key={v._id}
                         className="parc-vehicle-card parc-vehicle-card--assigned"
                         draggable
-                        onDragStart={() => setDraggedVehicle(v)}
-                        onDragEnd={() => setDraggedVehicle(null)}
+                        onDragStart={() => { setDraggedVehicle(v); setDraggedFromParcId(String(parc._id)) }}
+                        onDragEnd={() => { setDraggedVehicle(null); setDraggedFromParcId(null) }}
                       >
                         {v.images?.[0]
                           ? <img src={mediaUrl(v.images[0])} alt={v.name} className="parc-vehicle-card__img" />
@@ -2687,7 +2765,19 @@ export default function Admin() {
                           <div className="parc-vehicle-card__name">{v.name}</div>
                           <div className="parc-vehicle-card__sub">{v.year} · {v.seats} places</div>
                         </div>
-                        <span className="parc-vehicle-card__dot" />
+                        <button
+                          type="button"
+                          className="parc-vehicle-card__remove"
+                          title="Retirer de ce parc"
+                          draggable={false}
+                          onMouseDown={e => e.stopPropagation()}
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            try { await removeVehicleFromParc(v, parc._id) } catch { /* ignore */ }
+                          }}
+                        >
+                          <FiX size={12} />
+                        </button>
                       </div>
                     ))
                   }
@@ -2696,24 +2786,24 @@ export default function Admin() {
             ))}
 
             {/* Floating Drop zone to unassign */}
-            {draggedVehicle?.parc && (
+            {draggedFromParcId && (
               <div
                 className={`parc-col--unassign-drop ${dragOverParc === 'unassign' ? 'parc-col--drag-over' : ''}`}
                 onDragOver={e => { e.preventDefault(); setDragOverParc('unassign') }}
                 onDragLeave={() => setDragOverParc(null)}
                 onDrop={async () => {
                   setDragOverParc(null)
-                  if (!draggedVehicle) return
+                  if (!draggedVehicle || !draggedFromParcId) return
                   try {
-                    await vehiclesService.update(draggedVehicle._id, { parcId: null })
-                    await loadData()
+                    await removeVehicleFromParc(draggedVehicle, draggedFromParcId)
                   } catch { /* ignore */ }
                   setDraggedVehicle(null)
+                  setDraggedFromParcId(null)
                 }}
               >
                 <FiTrash2 size={24} color="#ef4444" />
                 <span style={{ fontSize:13, fontWeight:700, color:'#ef4444', textAlign:'center' }}>
-                  Désaffecter du parc
+                  Retirer de ce parc
                 </span>
                 <span style={{ fontSize:11, color:'rgba(255,255,255,0.5)', textAlign:'center' }}>
                   Glissez ici pour retirer
@@ -2730,11 +2820,11 @@ export default function Admin() {
             </div>
             <div className="parc-stat">
               <span className="parc-stat__icon">✅</span>
-              <div><div className="parc-stat__val">{vehicles.filter(v => v.parc).length}</div><div className="parc-stat__label">Véhicules Affectés</div></div>
+              <div><div className="parc-stat__val">{vehicles.filter(v => vehicleParcIds(v).length > 0).length}</div><div className="parc-stat__label">Véhicules Affectés</div></div>
             </div>
             <div className="parc-stat">
               <span className="parc-stat__icon">⏳</span>
-              <div><div className="parc-stat__val">{vehicles.filter(v => !v.parc).length}</div><div className="parc-stat__label">Non Affectés</div></div>
+              <div><div className="parc-stat__val">{vehicles.filter(v => vehicleParcIds(v).length === 0).length}</div><div className="parc-stat__label">Non Affectés</div></div>
             </div>
             <div className="parc-stat">
               <span className="parc-stat__icon">🏢</span>

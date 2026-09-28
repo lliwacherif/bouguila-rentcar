@@ -66,12 +66,16 @@ export class VehiclesController {
   @ApiParam({ name: 'id', description: 'MongoDB ObjectId of the vehicle' })
   @ApiQuery({ name: 'pickupDate', required: true, type: String })
   @ApiQuery({ name: 'dropoffDate', required: true, type: String })
+  @ApiQuery({ name: 'pickupTime', required: false, type: String })
+  @ApiQuery({ name: 'dropoffTime', required: false, type: String })
   getQuote(
     @Param('id') id: string,
     @Query('pickupDate') pickupDate: string,
     @Query('dropoffDate') dropoffDate: string,
+    @Query('pickupTime') pickupTime?: string,
+    @Query('dropoffTime') dropoffTime?: string,
   ) {
-    return this.vehiclesService.getQuote(id, pickupDate, dropoffDate);
+    return this.vehiclesService.getQuote(id, pickupDate, dropoffDate, pickupTime, dropoffTime);
   }
 
   /**

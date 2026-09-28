@@ -6,6 +6,7 @@ import { Vehicle, VehicleSchema } from './schemas/vehicle.schema';
 import { Reservation, ReservationSchema } from '../reservations/schemas/reservation.schema';
 import { VehicleStatusSyncService } from './vehicle-status-sync.service';
 import { VehiclePricingService } from './vehicle-pricing.service';
+import { RentalSettingsModule } from '../rental-settings/rental-settings.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { VehiclePricingService } from './vehicle-pricing.service';
       { name: Vehicle.name, schema: VehicleSchema },
       { name: Reservation.name, schema: ReservationSchema },
     ]),
+    RentalSettingsModule,
   ],
   providers: [VehiclesService, VehicleStatusSyncService, VehiclePricingService],
   controllers: [VehiclesController],

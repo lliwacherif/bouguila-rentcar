@@ -70,6 +70,15 @@ export class Reservation {
   @Prop({ required: true })
   dropoffDate: Date;
 
+  @Prop({ default: '10:00', trim: true })
+  pickupTime: string;
+
+  @Prop({ default: '10:00', trim: true })
+  dropoffTime: string;
+
+  @Prop({ default: false })
+  extraDayApplied: boolean;
+
   @Prop({ required: true, min: 18 })
   driverAge: number;
 

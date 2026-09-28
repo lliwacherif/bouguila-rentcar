@@ -160,6 +160,8 @@ export default function SearchResults() {
   const urlDropoff   = searchParams.get('dropoffDate') || ''
   const urlAge       = searchParams.get('driverAge')  || '30'
   const urlParcId    = searchParams.get('parcId')     || ''
+  const urlPickupTime = searchParams.get('pickupTime') || '10:00'
+  const urlDropoffTime = searchParams.get('dropoffTime') || '10:00'
 
   const [vehicles, setVehicles] = useState([])
   const [pagination, setPagination] = useState(null)
@@ -171,6 +173,8 @@ export default function SearchResults() {
   const [searchParcId, setSearchParcId]     = useState(urlParcId)
   const [searchPickup, setSearchPickup]     = useState(urlPickup)
   const [searchDropoff, setSearchDropoff]   = useState(urlDropoff)
+  const [searchPickupTime, setSearchPickupTime] = useState(urlPickupTime)
+  const [searchDropoffTime, setSearchDropoffTime] = useState(urlDropoffTime)
   const [searchAge, setSearchAge]           = useState(urlAge)
 
   // filters
@@ -211,8 +215,8 @@ export default function SearchResults() {
   const carDetailParams = new URLSearchParams({
     location: searchLocation,
     ...(searchParcId  && { parcId: searchParcId }),
-    ...(searchPickup  && { pickupDate:  searchPickup }),
-    ...(searchDropoff && { dropoffDate: searchDropoff }),
+    ...(searchPickup  && { pickupDate:  searchPickup, pickupTime: searchPickupTime || '10:00' }),
+    ...(searchDropoff && { dropoffDate: searchDropoff, dropoffTime: searchDropoffTime || '10:00' }),
     driverAge: String(effectiveAge),
   }).toString()
 
@@ -230,8 +234,8 @@ export default function SearchResults() {
         ...(selectedTrans.length > 0 && { transmission: selectedTrans[0] }),
         ...(selectedFuels.length > 0 && { fuel: selectedFuels[0] }),
         // Pass dates so backend excludes already-booked vehicles
-        ...(searchPickup  && { pickupDate:  searchPickup }),
-        ...(searchDropoff && { dropoffDate: searchDropoff }),
+        ...(searchPickup  && { pickupDate: searchPickup, pickupTime: searchPickupTime || '10:00' }),
+        ...(searchDropoff && { dropoffDate: searchDropoff, dropoffTime: searchDropoffTime || '10:00' }),
         // Age filter — only show cars the driver is old enough to rent
         driverAge: effectiveAge,
         // Parc filter — only show cars assigned to the selected parc
@@ -250,7 +254,7 @@ export default function SearchResults() {
     } finally {
       setLoading(false)
     }
-  }, [page, sortOrder, selectedCats, selectedTrans, selectedFuels, priceRange, searchPickup, searchDropoff, effectiveAge, searchParcId])
+  }, [page, sortOrder, selectedCats, selectedTrans, selectedFuels, priceRange, searchPickup, searchDropoff, searchPickupTime, searchDropoffTime, effectiveAge, searchParcId])
 
   useEffect(() => { fetchVehicles() }, [fetchVehicles])
 
@@ -261,6 +265,8 @@ export default function SearchResults() {
       ...(searchParcId && { parcId: searchParcId }),
       pickupDate: searchPickup,
       dropoffDate: searchDropoff,
+      pickupTime: searchPickupTime || '10:00',
+      dropoffTime: searchDropoffTime || '10:00',
       driverAge: String(effectiveAge),
     })
     fetchVehicles()
@@ -312,6 +318,13 @@ export default function SearchResults() {
                 value={searchPickup}
                 onChange={e => setSearchPickup(e.target.value)}
               />
+              <input
+                type="time"
+                className="sr-searchbar__field-input"
+                aria-label="Heure de prise en charge"
+                value={searchPickupTime}
+                onChange={e => setSearchPickupTime(e.target.value)}
+              />
             </div>
           </div>
           <div className="sr-searchbar__divider"/>
@@ -325,6 +338,13 @@ export default function SearchResults() {
                 value={searchDropoff}
                 min={searchPickup}
                 onChange={e => setSearchDropoff(e.target.value)}
+              />
+              <input
+                type="time"
+                className="sr-searchbar__field-input"
+                aria-label="Heure de restitution"
+                value={searchDropoffTime}
+                onChange={e => setSearchDropoffTime(e.target.value)}
               />
             </div>
           </div>

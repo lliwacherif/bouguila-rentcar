@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray, IsBoolean, IsDateString, IsEmail, IsEnum, IsMongoId,
-  IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf,
+  IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength, Min, MinLength, ValidateIf,
 } from 'class-validator';
 import { PaymentOption } from '../schemas/reservation.schema';
 
@@ -25,6 +25,16 @@ export class CreateReservationDto {
   @ApiProperty({ example: '2025-07-27', description: 'Drop-off date — must be after pickupDate' })
   @IsDateString()
   dropoffDate: string;
+
+  @ApiPropertyOptional({ example: '10:00', description: 'Pickup clock time HH:mm' })
+  @IsOptional()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/)
+  pickupTime?: string;
+
+  @ApiPropertyOptional({ example: '18:00', description: 'Return clock time HH:mm' })
+  @IsOptional()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/)
+  dropoffTime?: string;
 
   @ApiProperty({ example: 30, minimum: 18, description: 'Age of the primary driver (min 18)' })
   @IsNumber() @Min(18)

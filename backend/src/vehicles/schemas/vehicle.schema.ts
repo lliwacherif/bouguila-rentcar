@@ -141,7 +141,11 @@ export class Vehicle {
   @Prop({ min: 18, default: 21 })
   minDriverAge: number;
 
-  // ── Parc (parking location) ───────────────────────────────────────────────
+  // ── Parcs (a vehicle can be offered from several locations at once) ─────
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Parc' }], default: [] })
+  parcs: Types.ObjectId[];
+
+  /** First assigned parc. Kept so older records and filters still resolve. */
   @Prop({ type: Types.ObjectId, ref: 'Parc', default: null })
   parc?: Types.ObjectId;
 
